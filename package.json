@@ -1,0 +1,35 @@
+{
+  "name": "compute.rhino3d.appserver",
+  "version": "0.1.0",
+  "keywords": ["node.js", "expressjs", "compute.rhino3d", "rhino3d", "rhino3dm", "grasshopper3d"],
+  "description": "A node.js/expressjs server which communicates to a rhino3d compute geometry server to remote solve Frasshopper definitions.",
+  "homepage": "https://www.rhino3d.com/compute",
+  "repository":{"type": "git", "url": "https://github.com/mcneel/compute.rhino3d.appserver"},
+  "bugs": {"url": "https://github.com/mcneel/compute.rhino3d.appserver/issues"},
+  "contributors": [
+    {"name": "Luis E. Fraguada", "email": "luis@mcneel.com", "url": "https://github.com/fraguada"}
+  ],
+  "license": "MIT",
+  "preferGlobal": true,
+  "main": "./bin/www",
+  "bin": {
+    "compute-rhino3d-appserver": "./bin/www"
+  },
+  "scripts": {
+    "start": "node ./bin/www",
+    "start-args": "node ./bin/www --definitions C:\\data\\definitions --computeUrl http://localhost:8888/ ",
+    "start-global": "compute-rhino3d-appserver",
+    "start-global-args": "compute-rhino3d-appserver --definitions C:\\data\\definitions --computeUrl http://localhost:8888/"
+  },
+  "dependencies": {
+    "compute-rhino3d": "0.11.0",
+    "cookie-parser": "~1.4.4",
+    "cors": "2.8.5",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "jade": "~1.11.0",
+    "morgan": "~1.9.1",
+    "uuid": "8.1.0"
+  }
+}

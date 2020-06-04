@@ -1,5 +1,5 @@
 {
-  "name": "compute.rhino3d.appserver",
+  "name": "@mcneel/compute.rhino3d.appserver",
   "version": "0.1.0",
   "keywords": [
     "node.js",
@@ -17,6 +17,9 @@
   },
   "bugs": {
     "url": "https://github.com/mcneel/compute.rhino3d.appserver/issues"
+  },
+  "author": {
+    "name": "Robert McNeel & Associates"
   },
   "contributors": [
     {

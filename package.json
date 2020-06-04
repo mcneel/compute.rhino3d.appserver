@@ -1,6 +1,6 @@
 {
   "name": "@mcneel/compute.rhino3d.appserver",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "keywords": [
     "node.js",
     "expressjs",
@@ -37,9 +37,9 @@
   },
   "scripts": {
     "start": "node ./bin/www",
-    "start-args": "node ./bin/www --definitions C:\\data\\definitions --computeUrl http://localhost:8888/ ",
+    "start-args": "node ./bin/www --definitions C:\\data\\definitions --computeUrl http://localhost:8082/ ",
     "start-global": "compute-rhino3d-appserver",
-    "start-global-args": "compute-rhino3d-appserver --definitions C:\\data\\definitions --computeUrl http://localhost:8888/"
+    "start-global-args": "compute-rhino3d-appserver --definitions C:\\data\\definitions --computeUrl http://localhost:8082/"
   },
   "dependencies": {
     "compute-rhino3d": "0.11.0",

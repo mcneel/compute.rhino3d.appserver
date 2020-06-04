@@ -31,7 +31,7 @@ else
 if(urlArgId > -1)
   app.set('computeUrl', args[urlArgId+1]);
 else
-  app.set('computeUrl', 'http://localhost:8888/');
+  app.set('computeUrl', 'http://localhost:8082/');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

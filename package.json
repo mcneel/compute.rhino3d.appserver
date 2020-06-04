@@ -9,7 +9,7 @@
     "rhino3dm",
     "grasshopper3d"
   ],
-  "description": "A node.js/expressjs server which communicates to a rhino3d compute geometry server to remote solve Frasshopper definitions.",
+  "description": "A node.js/expressjs server which communicates to a rhino3d compute geometry server to remote solve Grasshopper definitions.",
   "homepage": "https://www.rhino3d.com/compute",
   "repository": {
     "type": "git",

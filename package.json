@@ -27,6 +27,7 @@
   ],
   "license": "MIT",
   "preferGlobal": true,
+  "engines": {"node": ">=12.17.0"},
   "main": "./bin/www",
   "bin": {
     "compute-rhino3d-appserver": "./bin/www"

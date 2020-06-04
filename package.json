@@ -1,13 +1,29 @@
 {
   "name": "compute.rhino3d.appserver",
   "version": "0.1.0",
-  "keywords": ["node.js", "expressjs", "compute.rhino3d", "rhino3d", "rhino3dm", "grasshopper3d"],
+  "keywords": [
+    "node.js",
+    "expressjs",
+    "compute.rhino3d",
+    "rhino3d",
+    "rhino3dm",
+    "grasshopper3d"
+  ],
   "description": "A node.js/expressjs server which communicates to a rhino3d compute geometry server to remote solve Frasshopper definitions.",
   "homepage": "https://www.rhino3d.com/compute",
-  "repository":{"type": "git", "url": "https://github.com/mcneel/compute.rhino3d.appserver"},
-  "bugs": {"url": "https://github.com/mcneel/compute.rhino3d.appserver/issues"},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mcneel/compute.rhino3d.appserver"
+  },
+  "bugs": {
+    "url": "https://github.com/mcneel/compute.rhino3d.appserver/issues"
+  },
   "contributors": [
-    {"name": "Luis E. Fraguada", "email": "luis@mcneel.com", "url": "https://github.com/fraguada"}
+    {
+      "name": "Luis E. Fraguada",
+      "email": "luis@mcneel.com",
+      "url": "https://github.com/fraguada"
+    }
   ],
   "license": "MIT",
   "preferGlobal": true,
@@ -28,8 +44,8 @@
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
-    "jade": "~1.11.0",
     "morgan": "~1.9.1",
+    "pug": "3.0.0",
     "uuid": "8.1.0"
   }
 }

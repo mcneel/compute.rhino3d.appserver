@@ -20,7 +20,7 @@ function compute(){
     // call appserver
 
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:3000/solve/' + data.definition, true);
+    xhr.open('POST', 'http://localhost:3000/' + data.definition, true);
 
     //Send the proper header information along with the request
     xhr.setRequestHeader("Content-Type", "application/json");
@@ -28,15 +28,14 @@ function compute(){
     xhr.onreadystatechange = function() { // Call a function when the state changes.
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
             // Request finished. Do processing here.
-            
-            let result = JSON.parse(xhr.response);
-            // console.log(result);
 
             // hide spinner
             document.getElementById('loader').style.display = 'none';
+            
+            let result = JSON.parse(xhr.response);
+            let data = JSON.parse(result.values[0].InnerTree['{ 0; }'][0].data);
 
-            let mesh = rhino.CommonObject.decode(result);
-
+            let mesh = rhino.CommonObject.decode(data);
             
             let material = new THREE.MeshNormalMaterial();
             let threeMesh = meshToThreejs(mesh, material);
@@ -50,6 +49,8 @@ function compute(){
 
             scene.add(threeMesh);
             
+        } else {
+            if(this.status === 500) console.error(xhr.response);
         }
     }
 

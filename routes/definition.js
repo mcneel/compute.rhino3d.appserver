@@ -1,13 +1,12 @@
-var express = require('express');
-var router = express.Router();
-var path = require('path');
+const express = require('express');
+let router = express.Router();
 
 /* GET definition information. */
 router.get('/:id', function(req, res, next) {
 
   let definition = req.app.get('definitions').find(o => o.id === req.params.id);
 
-  var options = {
+  const options = {
     root: req.app.get('definitionsDir'),
     headers: {
         'x-timestamp': Date.now(),

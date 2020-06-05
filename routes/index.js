@@ -6,6 +6,7 @@ router.get('/',  function(req, res, next) {
   
   let definitions = [];
   req.app.get('definitions').forEach( def => {
+    console.log(def);
     let data = {name: def.name, inputs: def.inputs, outputs: def.outputs};
     definitions.push(data);
   });
@@ -29,8 +30,8 @@ router.post('/:name', function(req, res, next) {
   let trees = [];
   definition.inputs.forEach( input => {
       // match body object parameter to definition input
-      let param = new compute.Grasshopper.DataTree(input);
-      param.append([0], [req.body.inputs[input]]);
+      let param = new compute.Grasshopper.DataTree(input.Name);
+      param.append([0], [req.body.inputs[input.Name]]);
       trees.push(param);
   });
 

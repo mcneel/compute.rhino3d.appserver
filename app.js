@@ -7,9 +7,10 @@ var cors = require('cors');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const compute = require('compute-rhino3d');
-
 var indexRouter = require('./routes/index');
 var definitionRouter = require('./routes/definition');
+
+console.log('appserver version: ' + process.env.npm_package_version);
 
 var app = express();
 
@@ -65,9 +66,9 @@ getFiles( app.get('definitionsDir') )
     if(file.includes('.gh') || file.includes('.ghx')) {
       let id =  uuidv4();
       app.get('definitions').push({name: file, id:id});
-      compute.computeFetch('io', {'requestedFile':fullUrl + 'definition/'+ id}).then(result => {
-        app.get('definitions').find(d => d.id === id).inputs = result.InputNames;
-        app.get('definitions').find(d => d.id === id).outputs = result.OutputNames;
+      compute.computeFetch('io?params=true', {'requestedFile':fullUrl + 'definition/'+ id}).then(result => {
+        app.get('definitions').find(d => d.id === id).inputs = result.Inputs;
+        app.get('definitions').find(d => d.id === id).outputs = result.Inputs;
       }).catch( (error) => console.log(error));
     }
 

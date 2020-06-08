@@ -41,7 +41,9 @@
     "start": "node ./bin/www",
     "start-args": "node ./bin/www --definitions C:\\data\\definitions --computeUrl http://localhost:8082/ ",
     "start-global": "compute-rhino3d-appserver",
-    "start-global-args": "compute-rhino3d-appserver --definitions C:\\data\\definitions --computeUrl http://localhost:8082/"
+    "start-global-args": "compute-rhino3d-appserver --definitions C:\\data\\definitions --computeUrl http://localhost:8082/",
+    "start-pm2": "pm2 start ./bin/www -i max",
+    "start-pm2-runtime": "pm2-runtime start ecosystem.config.js --env production"
   },
   "dependencies": {
     "compute-rhino3d": "0.11.0",
@@ -51,6 +53,7 @@
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
+    "pm2": "4.4.0",
     "rhino3dm": "0.11.0",
     "uuid": "8.1.0"
   }

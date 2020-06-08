@@ -1,18 +1,20 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var cors = require('cors');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const cors = require('cors');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const compute = require('compute-rhino3d');
-var indexRouter = require('./routes/index');
-var definitionRouter = require('./routes/definition');
+
+// routers
+const indexRouter = require('./routes/index');
+const definitionRouter = require('./routes/definition');
 
 console.log('appserver version: ' + process.env.npm_package_version);
 
-var app = express();
+const app = express();
 
 // get cmd line args
 // get arguments after first two elements in process.argv

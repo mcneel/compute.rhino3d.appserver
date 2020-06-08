@@ -21,6 +21,11 @@ In a terminal you can run: `curl http://localhost:3000/` (or just browse to that
 
 The `example` directory contains an html and js example for calling the solving the definition. Start an http server in this directory and navigate to the address in your browser.
 
+## Deploy
+You can deploy a copy of this app to heroku:
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 ## Configuration
 
 The server takes a few command line options to to configure where it looks for GH files and the address of your rhino compute server. If no options are passed, the server uses some defaults. You can include none, either, or both.

@@ -46,6 +46,7 @@
     "start-pm2-runtime": "pm2-runtime start ecosystem.config.js --env production"
   },
   "dependencies": {
+    "compression": "1.7.4",
     "compute-rhino3d": "0.11.0",
     "cookie-parser": "~1.4.4",
     "cors": "2.8.5",

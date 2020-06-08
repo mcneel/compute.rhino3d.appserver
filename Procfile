@@ -1,1 +1,1 @@
-web: npm start-pm2-runtime
+web: npm run start-pm2-runtime

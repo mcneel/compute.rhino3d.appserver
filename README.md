@@ -1,6 +1,9 @@
 # Rhino Compute AppServer Example
 This is a node.js server built with express which shows how to serve a few Grasshopper definitions and expose their remote solving via a basic API.
 
+![npm](https://img.shields.io/npm/v/@mcneel/compute.rhino3d.appserver?style=flat-square)
+![GitHub package.json version](https://img.shields.io/github/package-json/v/mcneel/compute.rhino3d.appserver?style=flat-square)
+
 ## Usage
  This assumes you have cloned the https://github.com/mcneel/compute.rhino3d repository and are running a debug rhino compute geometry server on the same machine.
 
@@ -25,6 +28,13 @@ option | default | specified (example)
 ------------ | ------------- | -------------
 --definitions | ./files/ | C:\\data\\definitions
 --computeUrl | http://localhost:8082 | http://localhost:8082
+
+## API Endpoints
+
+endpoint | method | return type | description
+------------ | ------------- | ------------- | -------------
+`/` | GET | `application/json` | data related to the definitions on the server
+`/definitionName.gh` | POST |  `application/json` | solves a GH definition and returns json data
 
 ## Example
 

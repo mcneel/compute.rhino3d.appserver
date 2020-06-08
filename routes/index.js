@@ -2,6 +2,7 @@ const express = require('express');
 let router = express.Router();
 const compute = require('compute-rhino3d');
 
+// Return information related to the definitions on the server
 router.get('/',  function(req, res, next) {
   
   let definitions = [];
@@ -14,6 +15,18 @@ router.get('/',  function(req, res, next) {
   res.setHeader('Content-Type', 'application/json');
   res.send(JSON.stringify(definitions));
 });
+
+/*
+
+// Return information related to a specific definition
+router.get('/:name', function(req, res, next){
+  let def = req.app.get('definitions').find(o => o.name === req.params.name);
+  let data = {name: def.name, inputs: def.inputs, outputs: def.outputs};
+  res.setHeader('Content-Type', 'application/json');
+  res.send(JSON.stringify(data));
+});
+
+*/
 
 // Solve GH definition
 router.post('/:name', function(req, res, next) {

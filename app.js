@@ -66,7 +66,7 @@ getFiles( app.get('definitionsDir') )
     if(file.includes('.gh') || file.includes('.ghx')) {
       let id =  uuidv4();
       app.get('definitions').push({name: file, id:id});
-      compute.computeFetch('io?params=true', {'requestedFile':fullUrl + 'definition/'+ id}).then(result => {
+      compute.computeFetch('io', {'requestedFile':fullUrl + 'definition/'+ id}).then(result => {
         app.get('definitions').find(d => d.id === id).inputs = result.Inputs;
         app.get('definitions').find(d => d.id === id).outputs = result.Inputs;
       }).catch( (error) => console.log(error));

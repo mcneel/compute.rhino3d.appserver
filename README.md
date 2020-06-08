@@ -3,6 +3,7 @@ This is a node.js server built with express which shows how to serve a few Grass
 
 ![npm](https://img.shields.io/npm/v/@mcneel/compute.rhino3d.appserver?style=flat-square)
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/mcneel/compute.rhino3d.appserver?style=flat-square)
+![node-current (scoped)](https://img.shields.io/node/v/@mcneel/compute.rhino3d.appserver?style=flat-square)
 
 ## Usage
  This assumes you have cloned the https://github.com/mcneel/compute.rhino3d repository and are running a debug rhino compute geometry server on the same machine.

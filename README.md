@@ -21,10 +21,12 @@ In a terminal you can run: `curl http://localhost:3000/` (or just browse to that
 
 The `example` directory contains an html and js example for calling the solving the definition. Start an http server in this directory and navigate to the address in your browser.
 
+<!--
 ## Deploy
 You can deploy a copy of this app to heroku:
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+ [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy) 
+-->
 
 ## Configuration
 

@@ -11,5 +11,15 @@
         "rhino3d",
         "rhino3dm",
         "grasshopper3d"
-      ]
+    ],
+    "env": {
+        "COMPUTE_TOKEN": {
+            "description": "Your compute token.",
+            "required":false
+        },
+        "COMPUTE_ADDRESS": {
+            "description": "The address to your Rhino3d geometry server.",
+            "required":false
+        }
+    }
   }

@@ -33,6 +33,7 @@ function compute(){
             document.getElementById('loader').style.display = 'none';
             
             let result = JSON.parse(xhr.response);
+            console.log(result);
             let data = JSON.parse(result.values[0].InnerTree['{ 0; }'][0].data);
 
             let mesh = rhino.CommonObject.decode(data);
@@ -50,7 +51,8 @@ function compute(){
             scene.add(threeMesh);
             
         } else {
-            if(this.status === 500) console.error(xhr.response);
+            //console.log(this.status);
+            if(this.status === 500) console.error(xhr);
         }
     }
 

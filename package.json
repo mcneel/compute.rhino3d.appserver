@@ -1,6 +1,6 @@
 {
   "name": "@mcneel/compute.rhino3d.appserver",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "keywords": [
     "node.js",
     "expressjs",
@@ -56,6 +56,8 @@
     "morgan": "~1.9.1",
     "pm2": "4.4.0",
     "rhino3dm": "0.11.0",
-    "uuid": "8.1.0"
-  }
+    "uuid": "8.1.0",
+    "dotenv": "8.2.0"
+  },
+  "devDependencies": {}
 }

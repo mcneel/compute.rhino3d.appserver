@@ -49,6 +49,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors());
 app.use(compression());
+app.use(express.static('example'))
 
 app.use('/', indexRouter);
 app.use('/definition', definitionRouter);

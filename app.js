@@ -70,9 +70,11 @@ getFiles( app.get('definitionsDir') )
 
   
   compute.url = app.get('computeUrl');
+
+  console.log(compute.url);
+
   app.set('definitions', []);
   console.log(files);
-
 
   let fullUrl = 'https://sta-compute-rhino3d-appserver.herokuapp.com/'; // watch this.
 

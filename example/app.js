@@ -20,7 +20,7 @@ function compute(){
     // call appserver
 
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://sta-compute-rhino3d-appserver.herokuapp.com/ + data.definition, true);
+    xhr.open('POST', 'https://sta-compute-rhino3d-appserver.herokuapp.com/' + data.definition, true);
 
     //Send the proper header information along with the request
     xhr.setRequestHeader("Content-Type", "application/json");

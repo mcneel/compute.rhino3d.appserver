@@ -36,6 +36,8 @@ router.post('/:name', function(req, res, next) {
     throw new Error('Definition not found on server.'); 
 
   compute.url = req.app.get('computeUrl');
+  compute.authToken = process.env.COMPUTE_TOKEN;
+  
   let fullUrl = req.protocol + '://' + req.get('host');
 
   // set parameters

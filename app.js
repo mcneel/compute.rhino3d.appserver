@@ -36,6 +36,8 @@ if(urlArgId > -1)
 else 
   app.set('computeUrl', process.env.COMPUTE_URL); // set to a geometry server running on the same machine. NOTE: Port 8082 is when Geometry Server is running debug
 
+if(process.env.COMPUTE_TOKEN !== undefined)
+  compute.authToken = process.env.COMPUTE_TOKEN
 
 console.log( app.set('computeUrl'));
 console.log(require('os').hostname());

@@ -68,7 +68,7 @@ router.post('/:name', function(req, res, next) {
   }
   */
 
-let definitionPath = 'https://sta-compute-rhino3d-appserver.herokuapp.com/' + '/definition/'+ definition.id;
+let definitionPath = fullUrl + '/definition/'+ definition.id;
 
 compute.Grasshopper.evaluateDefinition(definitionPath, trees).then(result => {
   

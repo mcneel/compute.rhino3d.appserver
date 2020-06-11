@@ -37,7 +37,7 @@ router.post('/:name', function(req, res, next) {
 
   compute.url = req.app.get('computeUrl');
   compute.authToken = process.env.COMPUTE_TOKEN;
-  
+
   let fullUrl = req.protocol + '://' + req.get('host');
 
   // set parameters
@@ -68,7 +68,7 @@ router.post('/:name', function(req, res, next) {
   }
   */
 
-let definitionPath = fullUrl + '/definition/'+ definition.id;
+let definitionPath = 'https://sta-compute-rhino3d-appserver.herokuapp.com/' + '/definition/'+ definition.id;
 
 compute.Grasshopper.evaluateDefinition(definitionPath, trees).then(result => {
   

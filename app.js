@@ -8,6 +8,7 @@ const cors = require('cors');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const compute = require('compute-rhino3d');
+require('dotenv').config();
 
 // routers
 const indexRouter = require('./routes/index');
@@ -32,8 +33,22 @@ else
 
 if(urlArgId > -1)
   app.set('computeUrl', args[urlArgId+1]);
+else 
+  app.set('computeUrl', process.env.COMPUTE_URL); // set to a geometry server running on the same machine. NOTE: Port 8082 is when Geometry Server is running debug
+
+compute.url = app.get('computeUrl');
+
+if(process.env.COMPUTE_TOKEN !== undefined)
+  compute.authToken = process.env.COMPUTE_TOKEN
+
+if(process.env.APP_URL !== undefined)
+  app.set('appUrl', process.env.APP_URL);
 else
-  app.set('computeUrl', 'http://localhost:8082/');
+  app.set('appUrl', 'http://localhost' + process.env.PORT || '3000' + '/');
+
+console.log( app.set('computeUrl'));
+console.log(require('os').hostname());
+console.log(process.env.NODE_ENV);
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -41,6 +56,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(cors());
 app.use(compression());
+app.use('/example', express.static('example'))
 
 app.use('/', indexRouter);
 app.use('/definition', definitionRouter);
@@ -60,23 +76,25 @@ getFiles( app.get('definitionsDir') )
   if(files.length === 0)
     throw new Error('No definitions found on server'); 
 
-  let fullUrl = 'http://localhost:' + app.get('port') +'/'; // watch this.
-  compute.url = app.get('computeUrl');
   app.set('definitions', []);
   console.log(files);
+
+  let fullUrl = app.get('appUrl'); // watch this.
 
   files.forEach(file => {
 
     if(file.includes('.gh') || file.includes('.ghx')) {
       let id =  uuidv4();
       app.get('definitions').push({name: file, id:id});
+      
       compute.computeFetch('io', {'requestedFile':fullUrl + 'definition/'+ id}).then(result => {
-        app.get('definitions').find(d => d.id === id).inputs = result.Inputs;
-        app.get('definitions').find(d => d.id === id).outputs = result.Inputs;
+        app.get('definitions').find(d => d.id === id).inputs = result.Inputs === undefined ? result.InputNames : result.Inputs;
+        app.get('definitions').find(d => d.id === id).outputs = result.Outputs === undefined ? result.OutputNames: result.Outputs;
       }).catch( (error) => console.log(error));
+      
     }
-
   });
+
 })
 .catch( (error)=>{ console.log(error) });
 

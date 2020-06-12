@@ -1,5 +1,5 @@
 const express = require('express');
-let router = express.Router();
+const router = express.Router();
 const compute = require('compute-rhino3d');
 
 // Return information related to the definitions on the server
@@ -7,7 +7,6 @@ router.get('/',  function(req, res, next) {
   
   let definitions = [];
   req.app.get('definitions').forEach( def => {
-    console.log(def);
     let data = {name: def.name, inputs: def.inputs, outputs: def.outputs};
     definitions.push(data);
   });
@@ -36,24 +35,26 @@ router.post('/:name', function(req, res, next) {
   if(definition === undefined)
     throw new Error('Definition not found on server.'); 
 
-  compute.url = req.app.get('computeUrl');
-  let fullUrl = req.protocol + '://' + req.get('host');
-
   // set parameters
   let trees = [];
-  definition.inputs.forEach( input => {
-      // match body object parameter to definition input
-      let param = new compute.Grasshopper.DataTree(input.Name);
-      param.append([0], [req.body.inputs[input.Name]]);
-      trees.push(param);
-  });
+  // console.log(req.body.inputs);
 
-let definitionPath = fullUrl + '/definition/'+ definition.id;
+  for (let [key, value] of Object.entries(req.body.inputs)) {
+    let param = new compute.Grasshopper.DataTree(key);
+    param.append([0], [value]);
+    trees.push(param);
+  }
 
-compute.Grasshopper.evaluateDefinition(definitionPath, trees).then(result => {
-  
-  res.setHeader('Content-Type', 'application/json');
-  res.send(result);
+  compute.url = req.app.get('computeUrl');
+  compute.authToken = process.env.COMPUTE_TOKEN;
+
+  let fullUrl = req.protocol + '://' + req.get('host');
+  let definitionPath = `${fullUrl}/definition/${definition.id}`;
+
+  compute.Grasshopper.evaluateDefinition(definitionPath, trees).then(result => {
+    
+    res.setHeader('Content-Type', 'application/json');
+    res.send(result);
 
   }).catch( (error) => { 
       console.log(error);

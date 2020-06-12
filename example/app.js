@@ -6,13 +6,15 @@ data.inputs = {
     'RH_IN:201:Radius':document.getElementById('radius').value
 };
 
+// set this to the target appserver url
+let url = 'https://sta-compute-rhino3d-appserver.herokuapp.com/';
+
 rhino3dm().then(async m => {
     console.log('Loaded rhino3dm.');
     rhino = m; // global
 
     init();
     compute();
-
 });
 
 function compute(){
@@ -20,7 +22,7 @@ function compute(){
     // call appserver
 
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://sta-compute-rhino3d-appserver.herokuapp.com/' + data.definition, true);
+    xhr.open('POST', url + data.definition, true);
 
     //Send the proper header information along with the request
     xhr.setRequestHeader("Content-Type", "application/json");
@@ -31,7 +33,6 @@ function compute(){
 
             // hide spinner
             document.getElementById('loader').style.display = 'none';
-            console.log(xhr.response);
             let result = JSON.parse(xhr.response);
             console.log(result);
             let data = JSON.parse(result.values[0].InnerTree['{ 0; }'][0].data);

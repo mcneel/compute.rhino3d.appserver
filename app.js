@@ -36,8 +36,15 @@ if(urlArgId > -1)
 else 
   app.set('computeUrl', process.env.COMPUTE_URL); // set to a geometry server running on the same machine. NOTE: Port 8082 is when Geometry Server is running debug
 
+compute.url = app.get('computeUrl');
+
 if(process.env.COMPUTE_TOKEN !== undefined)
   compute.authToken = process.env.COMPUTE_TOKEN
+
+if(process.env.APP_URL !== undefined)
+  app.set('appUrl', process.env.APP_URL);
+else
+  app.set('appUrl', 'http://localhost' + process.env.PORT || '3000' + '/');
 
 console.log( app.set('computeUrl'));
 console.log(require('os').hostname());
@@ -69,15 +76,10 @@ getFiles( app.get('definitionsDir') )
   if(files.length === 0)
     throw new Error('No definitions found on server'); 
 
-  
-  compute.url = app.get('computeUrl');
-
-  console.log(compute.url);
-
   app.set('definitions', []);
   console.log(files);
 
-  let fullUrl = 'https://sta-compute-rhino3d-appserver.herokuapp.com/'; // watch this.
+  let fullUrl = app.get('appUrl'); // watch this.
 
   files.forEach(file => {
 

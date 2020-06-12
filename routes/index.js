@@ -35,11 +35,6 @@ router.post('/:name', function(req, res, next) {
   if(definition === undefined)
     throw new Error('Definition not found on server.'); 
 
-  compute.url = req.app.get('computeUrl');
-  compute.authToken = process.env.COMPUTE_TOKEN;
-
-  let fullUrl = req.protocol + '://' + req.get('host');
-
   // set parameters
   let trees = [];
   // console.log(req.body.inputs);
@@ -49,31 +44,17 @@ router.post('/:name', function(req, res, next) {
     param.append([0], [value]);
     trees.push(param);
   }
-/*
-  req.body.inputs.forEach( input => {
-    console.log(input);
-    let param = new compute.Grasshopper.DataTree(input.Name);
-    param.append([0], [req.body.inputs[input.Name]]);
-    trees.push(param);
-  });
 
+  compute.url = req.app.get('computeUrl');
+  compute.authToken = process.env.COMPUTE_TOKEN;
 
-  if(definition.hasOwnKey('inputs')){
-    definition.inputs.forEach( input => {
-        // match body object parameter to definition input
-        let param = new compute.Grasshopper.DataTree(input.Name);
-        param.append([0], [req.body.inputs[input.Name]]);
-        trees.push(param);
-    });
-  }
-  */
+  let fullUrl = req.protocol + '://' + req.get('host');
+  let definitionPath = `${fullUrl}/definition/${definition.id}`;
 
-let definitionPath = fullUrl + '/definition/'+ definition.id;
-
-compute.Grasshopper.evaluateDefinition(definitionPath, trees).then(result => {
-  
-  res.setHeader('Content-Type', 'application/json');
-  res.send(result);
+  compute.Grasshopper.evaluateDefinition(definitionPath, trees).then(result => {
+    
+    res.setHeader('Content-Type', 'application/json');
+    res.send(result);
 
   }).catch( (error) => { 
       console.log(error);

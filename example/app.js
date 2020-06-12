@@ -31,7 +31,7 @@ function compute(){
 
             // hide spinner
             document.getElementById('loader').style.display = 'none';
-            
+            console.log(xhr.response);
             let result = JSON.parse(xhr.response);
             console.log(result);
             let data = JSON.parse(result.values[0].InnerTree['{ 0; }'][0].data);

@@ -47,11 +47,12 @@ https://myappname.herokuapp.com | https://git.heroku.com/myappname.git
 ```
 git push heroku master
 ```
-7. Finally, open the application:
+7. Finally, open the application. You should see your browser write some json formated information about the definitions.
 ```bash
 heroku open
 ```
-8. Navigate in a browser to your [Heroku dashboard](https://dashboard.heroku.com/). There you should see your new application. Click on your application name view it. You can view the logs by clicking on the `More` button and selecting `View logs`.
+8. Check out the example at https://myappname.herokuapp.com/example/ 
+9. Navigate in a browser to your [Heroku dashboard](https://dashboard.heroku.com/). There you should see your new application. Click on your application name view it. You can view the logs by clicking on the `More` button and selecting `View logs`.
 
 ### 2. TODO - Testing this app locally along side a running Compute server
 <!-- 

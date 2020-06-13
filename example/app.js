@@ -7,7 +7,9 @@ data.inputs = {
 };
 
 // set this to the target appserver url
-let url = 'https://sta-compute-rhino3d-appserver.herokuapp.com/';
+let url = window.location.href;
+url = url.substring(0, url.lastIndexOf('/'));
+url = url.substring(0, url.lastIndexOf('/')) + '/';
 
 rhino3dm().then(async m => {
     console.log('Loaded rhino3dm.');

@@ -46,6 +46,10 @@ function compute(){
 
             let mesh = rhino.CommonObject.decode(data);
             
+            t1 = performance.now()
+            console.log("Decode mesh time = " + (t1-t0) + "ms")
+            t0 = t1
+            
             let material = new THREE.MeshNormalMaterial();
             let threeMesh = meshToThreejs(mesh, material);
             mesh.delete()
@@ -123,9 +127,6 @@ function onWindowResize() {
 }
 
 function meshToThreejs(mesh, material) {
-    let normals = mesh.normals()
-    normals.computeNormals()
-    normals.delete()
     let loader = new THREE.BufferGeometryLoader();
     var geometry = loader.parse(mesh.toThreejsJSON());
     return new THREE.Mesh(geometry, material);

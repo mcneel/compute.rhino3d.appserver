@@ -21,9 +21,11 @@ rhino3dm().then(async m => {
   compute()
 })
 
+/**
+ * Call appserver
+ */
 function compute(){
-
-  // call appserver
+    let t0 = performance.now()
 
   var xhr = new XMLHttpRequest()
   xhr.open('POST', url + data.definition, true)
@@ -34,6 +36,9 @@ function compute(){
   xhr.onreadystatechange = function() { // Call a function when the state changes.
     if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
       // Request finished. Do processing here.
+      let t1 = performance.now()
+      console.log("Compute request time = " + (t1-t0) + "ms")
+      t0 = t1
 
       // hide spinner
       document.getElementById('loader').style.display = 'none'
@@ -42,9 +47,15 @@ function compute(){
       let data = JSON.parse(result.values[0].InnerTree['{ 0; }'][0].data)
 
       let mesh = rhino.CommonObject.decode(data)
-            
-      let material = new THREE.MeshNormalMaterial()
-      let threeMesh = meshToThreejs(mesh, material)
+      
+      t1 = performance.now()
+      console.log("Decode mesh time = " + (t1-t0) + "ms")
+      t0 = t1
+
+      let material = new THREE.MeshNormalMaterial();
+      let threeMesh = meshToThreejs(mesh, material);
+      mesh.delete()
+
 
       // clear meshes from scene
       scene.traverse(child => {
@@ -53,7 +64,9 @@ function compute(){
         }
       })
 
-      scene.add(threeMesh)
+      scene.add(threeMesh);
+      t1 = performance.now()
+      console.log("Scene build time = " + (t1-t0) + "ms")
             
     } else {
       //console.log(this.status)

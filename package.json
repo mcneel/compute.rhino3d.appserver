@@ -39,7 +39,7 @@
   },
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "nodemon -r dotenv/config ./bin/www --exec \"npm run lint && node\"",
+    "dev": "nodemon -r dotenv/config --inspect ./bin/www --exec \"npm run lint && node\"",
     "lint":"eslint *.js --fix && eslint routes/*.js --fix",
     "start-args": "node ./bin/www --definitions C:\\data\\definitions --computeUrl http://localhost:8082/ ",
     "start-global": "compute-rhino3d-appserver",

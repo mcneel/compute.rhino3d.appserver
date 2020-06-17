@@ -36,20 +36,21 @@ router.post('/:name', function(req, res, next) {
 
   // set parameters
   let trees = []
-  // console.log(req.body.inputs)
 
-  for (let [key, value] of Object.entries(req.body.inputs)) {
-    let param = new compute.Grasshopper.DataTree(key)
-    param.append([0], [value])
-    trees.push(param)
+  if(req.body.inputs !== undefined) { // handle no inputs
+    for (let [key, value] of Object.entries(req.body.inputs)) {
+      let param = new compute.Grasshopper.DataTree(key)
+      param.append([0], [value])
+      trees.push(param)
+    }
   }
-
+  
   compute.url = req.app.get('computeUrl')
   compute.authToken = process.env.COMPUTE_TOKEN
 
   let fullUrl = req.protocol + '://' + req.get('host')
   let definitionPath = `${fullUrl}/definition/${definition.id}`
-
+  
   compute.Grasshopper.evaluateDefinition(definitionPath, trees).then(result => {
     
     res.setHeader('Content-Type', 'application/json')

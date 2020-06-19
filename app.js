@@ -5,8 +5,8 @@ const compression = require('compression')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const cors = require('cors')
-const fs = require('fs')
-const { v4: uuidv4 } = require('uuid')
+//const fs = require('fs')
+//const { v4: uuidv4 } = require('uuid')
 const compute = require('compute-rhino3d')
 
 // dotenv only required for development. 
@@ -62,43 +62,6 @@ app.use('/example', express.static('example'))
 
 app.use('/', indexRouter)
 app.use('/definition', definitionRouter)
-
-function getFiles(dir) {
-  return new Promise ( (resolve, reject) => {
-    fs.readdir(dir, (err, files) => {
-      if(err) reject(err)
-      else resolve(files)
-    })
-  } )
-}
-
-getFiles( app.get('definitionsDir') )
-  .then( (files) => {
-
-    if(files.length === 0)
-      throw new Error('No definitions found on server') 
-
-    app.set('definitions', [])
-    console.log(files)
-
-    let fullUrl = app.get('appUrl') // watch this.
-
-    files.forEach(file => {
-
-      if(file.includes('.gh') || file.includes('.ghx')) {
-        let id =  uuidv4()
-        app.get('definitions').push({name: file, id:id})
-      
-        compute.computeFetch('io', {'requestedFile':fullUrl + 'definition/'+ id}).then(result => {
-          app.get('definitions').find(d => d.id === id).inputs = result.Inputs === undefined ? result.InputNames : result.Inputs
-          app.get('definitions').find(d => d.id === id).outputs = result.Outputs === undefined ? result.OutputNames: result.Outputs
-        }).catch( (error) => console.log(error))
-      
-      }
-    })
-
-  })
-  .catch( (error)=>{ console.log(error) })
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

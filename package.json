@@ -1,6 +1,6 @@
 {
   "name": "@mcneel/compute.rhino3d.appserver",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "keywords": [
     "node.js",
     "expressjs",
@@ -40,7 +40,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "dev": "nodemon -r dotenv/config --inspect ./bin/www --exec \"npm run lint && node\"",
-    "lint":"eslint *.js --fix && eslint routes/*.js --fix",
+    "lint": "eslint *.js --fix && eslint routes/*.js --fix && eslint bin/www --fix",
     "start-args": "node ./bin/www --definitions C:\\data\\definitions --computeUrl http://localhost:8082/ ",
     "start-global": "compute-rhino3d-appserver",
     "start-global-args": "compute-rhino3d-appserver --definitions C:\\data\\definitions --computeUrl http://localhost:8082/",
@@ -58,6 +58,7 @@
     "morgan": "~1.9.1",
     "pm2": "4.4.0",
     "rhino3dm": "0.11.0",
+    "throng": "4.0.0",
     "uuid": "8.1.0"
   },
   "devDependencies": {

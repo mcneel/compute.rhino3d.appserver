@@ -7,7 +7,7 @@ const logger = require('morgan')
 const cors = require('cors')
 const fs = require('fs')
 const { v4: uuidv4 } = require('uuid')
-const compute = require('compute-rhino3d')
+const compute = require('./example/compute-rhino3d')
 
 // dotenv only required for development. 
 // Heroku adds config vars in production. 

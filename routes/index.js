@@ -44,7 +44,7 @@ router.post('/:name', function(req, res, next) {
   compute.Grasshopper.evaluateDefinition(definitionPath, trees).then(result => {
     const timeComputeServerCallComplete = performance.now()
     const timespanSetup = timePreComputeServerCall-timePostStart
-    const timespanCompute = timePreComputeServerCall - timeComputeServerCallComplete
+    const timespanCompute = timeComputeServerCallComplete - timePreComputeServerCall
     const timing = `appserverSetup;dur=${timespanSetup}, compute;dur=${timespanCompute}`
     res.setHeader('Server-Timing', timing)
     res.setHeader('Content-Type', 'application/json')

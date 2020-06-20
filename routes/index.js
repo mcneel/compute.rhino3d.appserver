@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const compute = require('compute-rhino3d')
+const {performance} = require('perf_hooks')
 
 // Return information related to the definitions on the server
 router.get('/',  function(req, res, next) {

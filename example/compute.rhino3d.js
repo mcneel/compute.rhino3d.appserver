@@ -1,4 +1,9 @@
-const fetch = require('node-fetch')
+let fetchFunc = null
+if (typeof window === 'undefined') {
+  fetchFunc = require('node-fetch')
+} else {
+  fetchFunc = fetch
+}
 
 var RhinoCompute = {
     version: "0.11.0",
@@ -20,7 +25,7 @@ var RhinoCompute = {
     },
 
     computeFetch: function(endpoint, arglist) {
-        return fetch(RhinoCompute.url+endpoint, {
+        return fetchFunc(RhinoCompute.url+endpoint, {
                 "method":"POST",
                 "body": JSON.stringify(arglist),
                 "headers": {

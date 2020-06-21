@@ -48,7 +48,7 @@ router.post('/:name', function(req, res, next) {
     const timing = `appserverSetup;dur=${timespanSetup}, compute;dur=${timespanCompute}`
     res.setHeader('Server-Timing', timing)
     res.setHeader('Content-Type', 'application/json')
-    res.send(result)
+    res.send(result.json())
   }).catch( (error) => { 
     console.log(error)
     res.send('error in solve')

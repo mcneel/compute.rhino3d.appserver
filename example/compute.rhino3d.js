@@ -1,3 +1,5 @@
+const fetch = require('node-fetch')
+
 var RhinoCompute = {
     version: "0.11.0",
     url: "https://compute.rhino3d.com/",

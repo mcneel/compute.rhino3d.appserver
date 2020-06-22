@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const compute = require('compute-rhino3d')
+const compute = require('../example/compute.rhino3d')
+const {performance} = require('perf_hooks')
 
 // Return information related to the definitions on the server
 router.get('/',  function(req, res, next) {
@@ -26,7 +27,6 @@ router.get('/:name', function(req, res, next){
   let data = {name: definition.name}
 
   if(!Object.prototype.hasOwnProperty.call(definition, 'inputs') && !Object.prototype.hasOwnProperty.call(definition, 'outputs')){
-    //call compute /io
 
     compute.url = req.app.get('computeUrl')
     compute.authToken = process.env.COMPUTE_TOKEN
@@ -57,24 +57,20 @@ router.get('/:name', function(req, res, next){
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify(data))
   }
-
-  
-
 })
 
 
 
 // Solve GH definition
 router.post('/:name', function(req, res, next) {
-
+  const timePostStart = performance.now()
   let definition = req.app.get('definitions').find(o => o.name === req.params.name)
   
-  if(definition === undefined)
+  if(!definition)
     throw new Error('Definition not found on server.') 
 
   // set parameters
   let trees = []
-
   if(req.body.inputs !== undefined) { // handle no inputs
     for (let [key, value] of Object.entries(req.body.inputs)) {
       let param = new compute.Grasshopper.DataTree(key)
@@ -88,17 +84,20 @@ router.post('/:name', function(req, res, next) {
 
   let fullUrl = req.protocol + '://' + req.get('host')
   let definitionPath = `${fullUrl}/definition/${definition.id}`
-  
+  const timePreComputeServerCall = performance.now()
+  // call compute server
   compute.Grasshopper.evaluateDefinition(definitionPath, trees).then(result => {
-    
+    const timeComputeServerCallComplete = performance.now()
+    const timespanSetup = timePreComputeServerCall-timePostStart
+    const timespanCompute = timeComputeServerCallComplete - timePreComputeServerCall
+    const timing = `appserverSetup;dur=${timespanSetup}, compute;dur=${timespanCompute}`
+    res.setHeader('Server-Timing', timing)
     res.setHeader('Content-Type', 'application/json')
     res.send(result)
-
   }).catch( (error) => { 
     console.log(error)
     res.send('error in solve')
   })
-    
 })
 
 module.exports = router

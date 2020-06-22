@@ -1,67 +1,125 @@
 var RhinoCompute = {
-    version: "0.11.0",
-    url: "https://compute.rhino3d.com/",
-    authToken: null,
+  version: '0.12.0',
+  url: 'https://compute.rhino3d.com/',
+  authToken: null,
+  apiKey: null,
 
-    getAuthToken: function(useLocalStorage=true) {
-        let auth = null;
-        if (useLocalStorage)
-            auth = localStorage["compute_auth"];
-        if (auth == null) {
-            auth = window.prompt("Rhino Accounts auth token\nVisit https://www.rhino3d.com/compute/login");
-            if (auth != null && auth.length>20) {
-                auth = "Bearer " + auth;
-                localStorage.setItem("compute_auth", auth);
-            }
+  getAuthToken: function (useLocalStorage=true) {
+    let auth = null
+    if (useLocalStorage)
+      auth = localStorage['compute_auth']
+    if (auth == null) {
+      auth = window.prompt('Rhino Accounts auth token\nVisit https://www.rhino3d.com/compute/login')
+      if (auth != null && auth.length>20) {
+        auth = 'Bearer ' + auth
+        localStorage.setItem('compute_auth', auth)
+      }
+    }
+    return auth
+  },
+
+  computeFetch: function(endpoint, arglist, returnJson=true) {
+    let request = {
+      'method':'POST',
+      'body': JSON.stringify(arglist),
+      'headers': {'User-Agent': `compute.rhino3d.js/${RhinoCompute.version}`}
+    }
+    if (RhinoCompute.authToken) {
+      request.headers['Authorization'] = RhinoCompute.authToken
+    }
+    if (RhinoCompute.apiKey) {
+      request.headers['RhinoComputeKey'] = RhinoCompute.apiKey
+    }
+
+    let p = fetch(RhinoCompute.url+endpoint, request)
+    if (returnJson) return p.then(r=>r.json())
+    return p
+  },
+
+  Grasshopper: {
+    DataTree: class {
+      constructor (name) {
+        this.data = { 'ParamName': name, 'InnerTree': {} }
+      }
+      /**
+       * Append a path to this tree
+       * @param path (arr): a list of integers defining a path
+       * @param items (arr): list of data to add to the tree
+       */
+      append (path, items) {
+        let key = path.join(';')
+        let innerTreeData = []
+        items.forEach(item => {
+          innerTreeData.push({ 'data': item })
+        })
+        this.data.InnerTree[key] = innerTreeData
+      }
+    },
+    /**
+     * Evaluate a grasshopper definition
+     * @param definition (str|bytearray) contents of .gh/.ghx file or
+     *   url pointing to a grasshopper definition file
+     * @param trees (arr) list of DataTree instances
+     * @param returnJson (bool) if true, return a Promise with json data
+     *   otherwise a Promise with Response data
+     */
+    evaluateDefinition : function (definition, trees, returnJson=true) {
+      let args = {
+        'algo': null,
+        'pointer': null,
+        'values': null
+      }
+      if (definition.constructor === Uint8Array) {
+        args['algo'] = base64ByteArray(definition)
+      } else {
+        if (definition.startsWith('http')) {
+          args['pointer'] = definition
+        } else {
+          args['algo'] = btoa(definition)
         }
-        return auth;
-    },
+      }
 
-    computeFetch: function(endpoint, arglist) {
-        return fetch(RhinoCompute.url+endpoint, {
-                "method":"POST",
-                "body": JSON.stringify(arglist),
-                "headers": {
-                    "Authorization": RhinoCompute.authToken,
-                    "User-Agent": `compute.rhino3d.js/${RhinoCompute.version}`
-                },
-        }).then(r=>r.json());
-    },
+      let values = []
+      trees.forEach(tree => {
+        values.push(tree.data)
+      })
+      args['values'] = values
 
-    zipArgs: function(multiple, ...args) {
-        if(!multiple)
-            return args;
+      return RhinoCompute.computeFetch('grasshopper', args, returnJson)
+    }
+  },
 
-        if(args.length==1)
-            return args[0].map(function(_,i) { return [args[0][i]]; });
-        if(args.length==2)
-            return args[0].map(function(_,i) {
-                return [args[0][i],args[1][i]]; }
-            );
-        if(args.length==3)
-            return args[0].map(function(_,i) {
-                return [args[0][i],args[1][i],args[2][i]]; }
-            );
-        if(args.length==4)
-            return args[0].map(function(_,i) {
-                return [args[0][i],args[1][i],args[2][i],args[3][i]]; }
-            );
-        if(args.length==5)
-            return args[0].map(function(_,i) {
-                return [args[0][i],args[1][i],args[2][i],args[3][i],args[4][i]]; }
-            );
-        if(args.length==6)
-            return args[0].map(function(_,i) {
-                return [args[0][i],args[1][i],args[2][i],args[3][i],args[4][i],args[5][i]]; }
-            );
-        if(args.length==7)
-            return args[0].map(function(_,i) {
-                return [args[0][i],args[1][i],args[2][i],args[3][i],args[4][i],args[5][i],args[6][i]]; }
-            );
-        return args[0].map(function(_,i) {
-            return [args[0][i],args[1][i],args[2][i],args[3][i],args[4][i],args[5][i],args[6][i],args[7][i]]; }
-        );
-    },
+  zipArgs: function(multiple, ...args) {
+    if (!multiple) return args
+
+    if (args.length==1)
+      return args[0].map(function(_,i) { return [args[0][i]] })
+    if (args.length==2)
+      return args[0].map(function(_,i) { return [args[0][i],args[1][i]] })
+    if (args.length==3)
+      return args[0].map(function(_,i) {
+        return [args[0][i],args[1][i],args[2][i]] }
+      )
+    if (args.length==4)
+      return args[0].map(function(_,i) {
+        return [args[0][i],args[1][i],args[2][i],args[3][i]] }
+      )
+    if (args.length==5)
+      return args[0].map(function(_,i) {
+        return [args[0][i],args[1][i],args[2][i],args[3][i],args[4][i]] }
+      )
+    if (args.length==6)
+      return args[0].map(function(_,i) {
+        return [args[0][i],args[1][i],args[2][i],args[3][i],args[4][i],args[5][i]] }
+      )
+    if (args.length==7)
+      return args[0].map(function(_,i) {
+        return [args[0][i],args[1][i],args[2][i],args[3][i],args[4][i],args[5][i],args[6][i]] }
+      )
+    return args[0].map(function(_,i) {
+      return [args[0][i],args[1][i],args[2][i],args[3][i],args[4][i],args[5][i],args[6][i],args[7][i]] }
+    )
+  },
 
     Extrusion : {
         getWireframe : function(extrusion, multiple=false) {
@@ -3771,58 +3829,8 @@ var RhinoCompute = {
             let objects = rhino3dm.ArchivableDictionary.decodeDict(JSON.parse(result));
             return objects;
         }
-    },
-    Grasshopper: {
-        DataTree: class {
-            constructor(name) {
-                this.data = { 'ParamName': name, 'InnerTree': {} }
-            }
-
-            append(path, items) {
-                /**
-                 * Append a path to this tree
-                 * @param path (arr): a list of integers defining a path
-                 * @param items (arr): list of data to add to the tree
-                 */
-                let key = path.join(';')
-                let innerTreeData = []
-                items.forEach(item => {
-                    innerTreeData.push({ 'data': item })
-                })
-                this.data.InnerTree[key] = innerTreeData
-            }
-        },
-        evaluateDefinition : function(definition, trees) {
-            /**
-             * Evaluate a grasshopper definition
-             * @param definition (str|bytearray) contents of .gh/.ghx file or
-             *   url pointing to a grasshopper definition file
-             * @param trees (arr) list of DataTree instances
-             */
-
-            let url = 'grasshopper';
-            let args = { 'algo': null, 'pointer': null, 'values': null };
-            if (definition.constructor === Uint8Array)
-                args['algo'] = base64ByteArray(definition)
-            else {
-                if (definition.startsWith('http')) {
-                    args['pointer'] = definition;
-                } else {
-                    args['algo'] = btoa(definition);
-                }
-            }
-
-            let values = [];
-            trees.forEach(tree => {
-                values.push(tree.data);
-            });
-            args['values'] = values;
-
-            let promise = RhinoCompute.computeFetch(url, args);
-            return promise;
-        }
     }
-};
+}
 
 // https://gist.github.com/jonleighton/958841
 /*

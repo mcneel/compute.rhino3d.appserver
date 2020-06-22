@@ -39,8 +39,6 @@ router.get('/:name', function(req, res, next){
       let inputs = result.Inputs === undefined ? result.InputNames : result.Inputs
       let outputs = result.Outputs === undefined ? result.OutputNames: result.Outputs
 
-      req.app.get('definitions').find(o => o.name === req.params.name).inputs = inputs
-      req.app.get('definitions').find(o => o.name === req.params.name).outputs = outputs
       data.inputs = inputs
       data.outputs = outputs
 

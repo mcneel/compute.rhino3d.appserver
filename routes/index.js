@@ -83,19 +83,33 @@ router.post('/:name', function(req, res, next) {
   let fullUrl = req.protocol + '://' + req.get('host')
   let definitionPath = `${fullUrl}/definition/${definition.id}`
   const timePreComputeServerCall = performance.now()
+  let computeServerTiming = null
   // call compute server
-  compute.Grasshopper.evaluateDefinition(definitionPath, trees).then(result => {
-    const timeComputeServerCallComplete = performance.now()
-    const timespanSetup = timePreComputeServerCall-timePostStart
-    const timespanCompute = timeComputeServerCallComplete - timePreComputeServerCall
-    const timing = `appserverSetup;dur=${timespanSetup}, compute;dur=${timespanCompute}`
-    res.setHeader('Server-Timing', timing)
-    res.setHeader('Content-Type', 'application/json')
-    res.send(result)
-  }).catch( (error) => { 
-    console.log(error)
-    res.send('error in solve')
-  })
+  compute.Grasshopper.evaluateDefinition(definitionPath, trees, false)
+    .then(computeResponse => {
+      computeServerTiming = computeResponse.headers
+      computeResponse.buffer().then(result=> {
+        const timeComputeServerCallComplete = performance.now()
+
+        let computeTimings = computeServerTiming.get('server-timing')
+        let sum = 0
+        computeTimings.split(',').forEach(element => {
+          let t = element.split('=')[1].trim()
+          sum += Number(t)
+        })
+        const timespanCompute = timeComputeServerCallComplete - timePreComputeServerCall
+        const timespanComputeNetwork = Math.round(timespanCompute - sum)
+        const timespanSetup = Math.round(timePreComputeServerCall - timePostStart)
+        const timing = `setup;dur=${timespanSetup}, ${computeTimings}, network;dur=${timespanComputeNetwork}`
+
+        res.setHeader('Server-Timing', timing)
+        res.setHeader('Content-Type', 'application/json')
+        res.send(result)
+      }).catch( (error) => { 
+        console.log(error)
+        res.send('error in solve')
+      })
+    })
 })
 
 module.exports = router

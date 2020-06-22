@@ -39,14 +39,10 @@
   },
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "nodemon -r dotenv/config --inspect ./bin/www --exec \"npm run lint && node\"",
+    "dev": "nodemon --inspect ./bin/www --exec \"npm run lint && node\"",
     "lint": "eslint *.js --fix && eslint routes/*.js --fix && eslint bin/www --fix",
-    "start-args": "node ./bin/www --definitions C:\\data\\definitions --computeUrl http://localhost:8082/ ",
-    "start-global": "compute-rhino3d-appserver",
-    "start-global-args": "compute-rhino3d-appserver --definitions C:\\data\\definitions --computeUrl http://localhost:8082/",
-    "start-pm2": "pm2 start ./bin/www -i max",
-    "start-pm2-runtime": "pm2-runtime start ecosystem.config.js --env production"
-  },
+    "start-args": "node ./bin/www --definitions C:\\data\\definitions --computeUrl http://localhost:8081/"
+   },
   "dependencies": {
     "compression": "1.7.4",
     "compute-rhino3d": "0.11.0",
@@ -56,7 +52,6 @@
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "morgan": "~1.9.1",
-    "pm2": "4.4.0",
     "rhino3dm": "0.11.0",
     "throng": "4.0.0",
     "uuid": "8.1.0"

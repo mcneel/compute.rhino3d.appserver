@@ -14,15 +14,11 @@
     ],
     "env": {
         "COMPUTE_TOKEN": {
-            "description": "Your compute token.",
+            "description": "Your compute token. This is necessary if COMPUTE_URL is https://compute.rhino3d.com/",
             "required":false
         },
-        "COMPUTE_ADDRESS": {
+        "COMPUTE_URL": {
             "description": "The address to your Rhino3d geometry server.",
-            "required":true
-        },
-        "APP_URL": {
-            "description": "The address of this application.",
             "required":true
         }
     }

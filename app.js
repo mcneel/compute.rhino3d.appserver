@@ -5,14 +5,6 @@ const compression = require('compression')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const cors = require('cors')
-//const fs = require('fs')
-//const { v4: uuidv4 } = require('uuid')
-const compute = require('compute-rhino3d')
-
-// dotenv only required for development. 
-// Heroku adds config vars in production. 
-// If not running on Heroku, you might want to add this back in with your own .env file.
-// require('dotenv').config()
 
 // routers
 const indexRouter = require('./routes/index')
@@ -20,7 +12,6 @@ const definitionRouter = require('./routes/definition')
 
 const app = express()
 
-// get cmd line args
 // get arguments after first two elements in process.argv
 let args = process.argv.splice(2)
 
@@ -28,25 +19,15 @@ let defArgId = args.indexOf('--definitions')
 let urlArgId = args.indexOf('--computeUrl')
 
 // set arguments or accept defaults
+app.set(app.set('definitionsDir', path.join(__dirname, 'files/')))
 if(defArgId > -1)
   app.set('definitionsDir', path.normalize(args[defArgId+1]))
-else
-  app.set(app.set('definitionsDir', path.join(__dirname, 'files/')))
-
+  
+app.set('computeUrl', 'http://localhost:8081/')
 if(urlArgId > -1)
   app.set('computeUrl', args[urlArgId+1])
-else 
+else if(process.env.COMPUTE_URL !== undefined)
   app.set('computeUrl', process.env.COMPUTE_URL) // set to a geometry server running on the same machine. NOTE: Port 8082 is when Geometry Server is running debug
-
-compute.url = app.get('computeUrl')
-
-if(process.env.COMPUTE_TOKEN !== undefined)
-  compute.authToken = process.env.COMPUTE_TOKEN
-
-if(process.env.APP_URL !== undefined)
-  app.set('appUrl', process.env.APP_URL)
-else
-  app.set('appUrl', 'http://localhost' + process.env.PORT || '3000' + '/')
 
 console.log('VERSION: ' + process.env.npm_package_version)
 console.log('COMPUTE_URL: ' + app.get('computeUrl'))

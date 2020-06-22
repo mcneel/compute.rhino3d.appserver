@@ -14,17 +14,55 @@ router.get('/',  function(req, res, next) {
   res.send(JSON.stringify(definitions))
 })
 
-/*
+
 
 // Return information related to a specific definition
 router.get('/:name', function(req, res, next){
-  let def = req.app.get('definitions').find(o => o.name === req.params.name)
-  let data = {name: def.name, inputs: def.inputs, outputs: def.outputs}
-  res.setHeader('Content-Type', 'application/json')
-  res.send(JSON.stringify(data))
+  let definition = req.app.get('definitions').find(o => o.name === req.params.name)
+
+  if(definition === undefined)
+    throw new Error('Definition not found on server.') 
+
+  let data = {name: definition.name}
+
+  if(!Object.prototype.hasOwnProperty.call(definition, 'inputs') && !Object.prototype.hasOwnProperty.call(definition, 'outputs')){
+    //call compute /io
+
+    compute.url = req.app.get('computeUrl')
+    compute.authToken = process.env.COMPUTE_TOKEN
+
+    let fullUrl = req.protocol + '://' + req.get('host')
+    let definitionPath = `${fullUrl}/definition/${definition.id}`
+    
+    compute.computeFetch('io', {'requestedFile':definitionPath}).then(result => {
+
+      let inputs = result.Inputs === undefined ? result.InputNames : result.Inputs
+      let outputs = result.Outputs === undefined ? result.OutputNames: result.Outputs
+
+      req.app.get('definitions').find(o => o.name === req.params.name).inputs = inputs
+      req.app.get('definitions').find(o => o.name === req.params.name).outputs = outputs
+      data.inputs = inputs
+      data.outputs = outputs
+
+      res.setHeader('Content-Type', 'application/json')
+      res.send(JSON.stringify(data))
+
+    }).catch( (error) => console.log(error))
+
+
+  } else {
+    data.inputs = definition.inputs
+    data.outputs = definition.outputs
+
+    res.setHeader('Content-Type', 'application/json')
+    res.send(JSON.stringify(data))
+  }
+
+  
+
 })
 
-*/
+
 
 // Solve GH definition
 router.post('/:name', function(req, res, next) {

@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const { v4: uuidv4 } = require('uuid')
+const md5File = require('md5-file')
 
 /*
 function getFiles(dir) {
@@ -21,7 +21,8 @@ module.exports = (() => {
   let definitions = []
   files.forEach( file => {
     if(file.includes('.gh') || file.includes('.ghx')) {
-      definitions.push({name: file, id:uuidv4()})
+      const hash = md5File.sync(path.join(__dirname, 'files/' + file))
+      definitions.push({name: file, id:hash})
     }
   })
   return definitions

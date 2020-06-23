@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const compute = require('../example/compute.rhino3d')
+const compute = require('compute-rhino3d')
 const {performance} = require('perf_hooks')
 
 function computeParams (req, res, next){

@@ -3,6 +3,13 @@ const router = express.Router()
 const compute = require('../example/compute.rhino3d')
 const {performance} = require('perf_hooks')
 
+function computeParams (req, res, next){
+  compute.url = req.app.get('computeUrl')
+  compute.authToken = process.env.COMPUTE_TOKEN
+  compute.apiKey = process.env.RHINO_COMPUTE_KEY
+  next()
+}
+
 // Return information related to the definitions on the server
 router.get('/',  function(req, res, next) {
   let definitions = []
@@ -15,10 +22,8 @@ router.get('/',  function(req, res, next) {
   res.send(JSON.stringify(definitions))
 })
 
-
-
 // Return information related to a specific definition
-router.get('/:name', function(req, res, next){
+router.get('/:name', computeParams, function(req, res, next){
   let definition = req.app.get('definitions').find(o => o.name === req.params.name)
 
   if(definition === undefined)
@@ -27,10 +32,6 @@ router.get('/:name', function(req, res, next){
   let data = {name: definition.name}
 
   if(!Object.prototype.hasOwnProperty.call(definition, 'inputs') && !Object.prototype.hasOwnProperty.call(definition, 'outputs')){
-
-    compute.url = req.app.get('computeUrl')
-    compute.authToken = process.env.COMPUTE_TOKEN
-    compute.apiKey = process.env.RHINO_COMPUTE_KEY
 
     let fullUrl = req.protocol + '://' + req.get('host')
     let definitionPath = `${fullUrl}/definition/${definition.id}`
@@ -61,7 +62,7 @@ router.get('/:name', function(req, res, next){
 
 
 // Solve GH definition
-router.post('/:name', function(req, res, next) {
+router.post('/:name', computeParams, function(req, res, next) {
   const timePostStart = performance.now()
   let definition = req.app.get('definitions').find(o => o.name === req.params.name)
   
@@ -77,10 +78,6 @@ router.post('/:name', function(req, res, next) {
       trees.push(param)
     }
   }
-  
-  compute.url = req.app.get('computeUrl')
-  compute.authToken = process.env.COMPUTE_TOKEN
-  compute.apiKey = process.env.RHINO_COMPUTE_KEY
 
   let fullUrl = req.protocol + '://' + req.get('host')
   let definitionPath = `${fullUrl}/definition/${definition.id}`

@@ -78,15 +78,15 @@ https://myappname.herokuapp.com | https://git.heroku.com/myappname.git
 (This step can also be completed via the Heroku dashboard)
    - From the terminal, set the `COMPUTE_URL` variable. The VALUE of this should be the address to the server running compute. Ensure this address ends in a `/`.
    ```bash
-   heroku config:set COMPUTE_URL=http://your-compute-server-address/
+   $ heroku config:set COMPUTE_URL=http://your-compute-server-address/
    ``` 
 6. Push the code to Heroku:
 ```
-git push heroku master
+$ git push heroku master
 ```
 7. Finally, open the application. You should see your browser write some json formated information about the definitions.
 ```bash
-heroku open
+$ heroku open
 ```
 8. Check out the example at https://myappname.herokuapp.com/example/ 
 9. Navigate in a browser to your [Heroku dashboard](https://dashboard.heroku.com/). There you should see your new application. Click on your application name view it. You can view the logs by clicking on the `More` button and selecting `View logs`.

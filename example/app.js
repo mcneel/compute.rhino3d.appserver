@@ -25,7 +25,7 @@ rhino3dm().then(async m => {
  * Call appserver
  */
 function compute(){
-    let t0 = performance.now()
+  let t0 = performance.now()
 
   var xhr = new XMLHttpRequest()
   xhr.open('POST', url + data.definition, true)
@@ -37,25 +37,23 @@ function compute(){
     if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
       // Request finished. Do processing here.
       let t1 = performance.now()
-      console.log("Compute request time = " + (t1-t0) + "ms")
+      const computeSolveTime = t1 - t0
       t0 = t1
 
       // hide spinner
       document.getElementById('loader').style.display = 'none'
       let result = JSON.parse(xhr.response)
-      console.log(result)
       let data = JSON.parse(result.values[0].InnerTree['{ 0; }'][0].data)
 
       let mesh = rhino.CommonObject.decode(data)
       
       t1 = performance.now()
-      console.log("Decode mesh time = " + (t1-t0) + "ms")
+      const decodeMeshTime = t1 - t0
       t0 = t1
 
-      let material = new THREE.MeshNormalMaterial();
-      let threeMesh = meshToThreejs(mesh, material);
+      let material = new THREE.MeshNormalMaterial()
+      let threeMesh = meshToThreejs(mesh, material)
       mesh.delete()
-
 
       // clear meshes from scene
       scene.traverse(child => {
@@ -64,10 +62,23 @@ function compute(){
         }
       })
 
-      scene.add(threeMesh);
+      scene.add(threeMesh)
       t1 = performance.now()
-      console.log("Scene build time = " + (t1-t0) + "ms")
-            
+      const rebuildSceneTime = t1 - t0
+
+      console.log('[call compute and rebuild scene]')
+      console.log(`  ${Math.round(computeSolveTime)} ms: appserver request`)
+      let timings = xhr.getResponseHeader('server-timing').split(',')
+      let sum = 0
+      timings.forEach(element => {
+        let name = element.split(';')[0].trim()
+        let time = element.split('=')[1].trim()
+        sum += Number(time)
+        console.log(`  .. ${time} ms: ${name}`)
+      })
+      console.log(`  .. ${Math.round(computeSolveTime - sum)} ms: local to appserver network`)
+      console.log(`  ${Math.round(decodeMeshTime)} ms: decode json to rhino3dm mesh`)
+      console.log(`  ${Math.round(rebuildSceneTime)} ms: create threejs mesh and insert in scene`)
     } else {
       //console.log(this.status)
       if(this.status === 500) console.error(xhr)
@@ -75,11 +86,13 @@ function compute(){
   }
 
   xhr.send(JSON.stringify(data))
-
 }
 
-function onSliderChange(){
-
+/**
+ * Called when a slider value changes in the UI. Collect all of the
+ * slider values and call compute to solve for a new scene
+ */
+function onSliderChange () {
   // show spinner
   document.getElementById('loader').style.display = 'block'
 
@@ -89,7 +102,6 @@ function onSliderChange(){
     'RH_IN:201:Count':document.getElementById('count').value,
     'RH_IN:201:Radius':document.getElementById('radius').value
   }
-
   compute()
 }
 
@@ -97,7 +109,7 @@ function onSliderChange(){
 
 var scene, camera, renderer, controls
 
-function init(){
+function init () {
   scene = new THREE.Scene()
   scene.background = new THREE.Color(1,1,1)
   camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 )
@@ -105,7 +117,7 @@ function init(){
   renderer = new THREE.WebGLRenderer({antialias: true})
   renderer.setPixelRatio( window.devicePixelRatio )
   renderer.setSize( window.innerWidth, window.innerHeight )
-  var canvas = document.getElementById('canvas')
+  let canvas = document.getElementById('canvas')
   canvas.appendChild( renderer.domElement )
 
   controls = new THREE.OrbitControls( camera, renderer.domElement  )
@@ -130,7 +142,7 @@ function onWindowResize() {
   animate()
 }
 
-function meshToThreejs(mesh, material) {
+function meshToThreejs (mesh, material) {
   let loader = new THREE.BufferGeometryLoader()
   var geometry = loader.parse(mesh.toThreejsJSON())
   return new THREE.Mesh(geometry, material)

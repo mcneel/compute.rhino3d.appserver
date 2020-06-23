@@ -26,6 +26,7 @@ rhino3dm().then(async m => {
  */
 function compute(){
   let t0 = performance.now()
+  const timeComputeStart = t0
 
   var xhr = new XMLHttpRequest()
   xhr.open('POST', url + data.definition, true)
@@ -66,7 +67,7 @@ function compute(){
       t1 = performance.now()
       const rebuildSceneTime = t1 - t0
 
-      console.log('[call compute and rebuild scene]')
+      console.log(`[call compute and rebuild scene] = ${Math.round(t1-timeComputeStart)} ms`)
       console.log(`  ${Math.round(computeSolveTime)} ms: appserver request`)
       let timings = xhr.getResponseHeader('server-timing').split(',')
       let sum = 0
@@ -74,9 +75,13 @@ function compute(){
         let name = element.split(';')[0].trim()
         let time = element.split('=')[1].trim()
         sum += Number(time)
-        console.log(`  .. ${time} ms: ${name}`)
+        if (name === 'network') {
+          console.log(`  .. ${time} ms: appserver<->compute network latency`)
+        } else {
+          console.log(`  .. ${time} ms: ${name}`)
+        }
       })
-      console.log(`  .. ${Math.round(computeSolveTime - sum)} ms: local to appserver network`)
+      console.log(`  .. ${Math.round(computeSolveTime - sum)} ms: local<->appserver network latency`)
       console.log(`  ${Math.round(decodeMeshTime)} ms: decode json to rhino3dm mesh`)
       console.log(`  ${Math.round(rebuildSceneTime)} ms: create threejs mesh and insert in scene`)
     } else {

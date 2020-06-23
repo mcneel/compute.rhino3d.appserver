@@ -30,6 +30,7 @@ router.get('/:name', function(req, res, next){
 
     compute.url = req.app.get('computeUrl')
     compute.authToken = process.env.COMPUTE_TOKEN
+    compute.apiKey = process.env.RHINO_COMPUTE_KEY
 
     let fullUrl = req.protocol + '://' + req.get('host')
     let definitionPath = `${fullUrl}/definition/${definition.id}`

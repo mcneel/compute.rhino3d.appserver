@@ -8,7 +8,6 @@ This is a node.js server built with express which shows how to serve a few Grass
 1. [Use Cases](#use-cases)
     1. [Running this app locally](#running-this-app-locally)
     2. [Deploying this app on **Heroku** ](#deploying-this-app-on-heroku)
-    3. [Installing from npm](#installing-from-npm)
 2. [API Endpoints](#api-endpoints)
 3. [Example](#example)
 
@@ -33,9 +32,9 @@ $ npm install
 
 $ npm run dev
 
-# alternatively, if you'd like to define a different directory for your definitions or use a different address for the compute server (check the 'dev' script in packages.json):
+# alternatively, if you'd like to define a different address for the compute server (check the 'dev' script in packages.json):
 
-$ nodemon --inspect ./bin/www --definitions C:\\data\\definitions --computeUrl http://localhost:8081/  --exec \"npm run lint && node\""
+$ nodemon --inspect ./bin/www --computeUrl http://localhost:8081/  --exec \"npm run lint && node\""
 ```
 4. Navigate to `http://localhost:3000/example/` to test the example included in this project.
 5. If you'd like to add any definitions, add .gh or .ghx files to the `./files/` directory.
@@ -46,7 +45,7 @@ $ nodemon --inspect ./bin/www --definitions C:\\data\\definitions --computeUrl h
 $ node ./bin/www
 
 # or with command line arguments (same as "npm run start-args" defined in package.json)
-$ node ./bin/www --definitions C:\\data\\definitions --computeUrl http://localhost:8081/
+$ node ./bin/www --computeUrl http://localhost:8081/
 ```
 
 ### Deploying this app on **Heroku** 
@@ -92,23 +91,6 @@ heroku open
 ```
 8. Check out the example at https://myappname.herokuapp.com/example/ 
 9. Navigate in a browser to your [Heroku dashboard](https://dashboard.heroku.com/). There you should see your new application. Click on your application name view it. You can view the logs by clicking on the `More` button and selecting `View logs`.
-
-### Installing from npm
-
-You can install this app from npm either as a local or global package.
-
-1. In a terminal, install this application:
-```bash
-npm i compute-rhino3d-appserver
-```
-or globally
-```bash
-npm i compute-rhino3d-appserver -g
-```
-2. Run this application with a few command line arguments to set your definitions folder and the compute geometry server URL:
-```bash
-compute-rhino3d-appserver --definitions C:\\data\\definitions --computeUrl http://localhost:8081/
-```
 
 ## API Endpoints
 

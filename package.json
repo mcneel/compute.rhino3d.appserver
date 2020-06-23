@@ -41,7 +41,7 @@
     "start": "node ./bin/www",
     "dev": "nodemon --inspect ./bin/www --exec \"npm run lint && node\"",
     "lint": "eslint *.js --fix && eslint routes/*.js --fix && eslint bin/www --fix",
-    "start-args": "node ./bin/www --definitions C:\\data\\definitions --computeUrl http://localhost:8081/"
+    "start-args": "node ./bin/www --computeUrl http://localhost:8081/"
   },
   "dependencies": {
     "compression": "1.7.4",

@@ -1,8 +1,7 @@
 # Rhino Compute AppServer Example
 This is a node.js server built with express which shows how to serve a few Grasshopper definitions and expose their remote solving via a basic API.
 
-[![npm](https://img.shields.io/npm/v/@mcneel/compute.rhino3d.appserver?style=flat-square)](https://www.npmjs.com/package/@mcneel/compute.rhino3d.appserver)
-![GitHub package.json version](https://img.shields.io/github/package-json/v/mcneel/compute.rhino3d.appserver?style=flat-square)
+![GitHub package.json version](https://img.shields.io/github/package-json/v/mcneel/compute.rhino3d.appserver/main?label=version&style=flat-square)
 ![node-current (scoped)](https://img.shields.io/node/v/@mcneel/compute.rhino3d.appserver?style=flat-square)
 
 1. [Use Cases](#use-cases)

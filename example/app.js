@@ -55,15 +55,8 @@ function compute(){
       let material = new THREE.MeshNormalMaterial()
       let threeMesh = meshToThreejs(mesh, material)
       mesh.delete()
+      replaceCurrentMesh(threeMesh)
 
-      // clear meshes from scene
-      scene.traverse(child => {
-        if(child.type === 'Mesh'){
-          scene.remove(child)
-        }
-      })
-
-      scene.add(threeMesh)
       t1 = performance.now()
       const rebuildSceneTime = t1 - t0
 
@@ -113,6 +106,7 @@ function onSliderChange () {
 // BOILERPLATE //
 
 var scene, camera, renderer, controls
+let _threeMesh = null
 
 function init () {
   scene = new THREE.Scene()
@@ -145,6 +139,16 @@ function onWindowResize() {
   camera.updateProjectionMatrix()
   renderer.setSize( window.innerWidth, window.innerHeight )
   animate()
+}
+
+function replaceCurrentMesh (threeMesh) {
+  if (_threeMesh) {
+    scene.remove(_threeMesh)
+    _threeMesh.geometry.dispose()
+    _threeMesh.material.dispose()
+  }
+  _threeMesh = threeMesh
+  scene.add(_threeMesh)
 }
 
 function meshToThreejs (mesh, material) {

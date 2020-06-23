@@ -24,66 +24,61 @@ rhino3dm().then(async m => {
 /**
  * Call appserver
  */
-function compute(){
+async function compute(){
   let t0 = performance.now()
   const timeComputeStart = t0
 
-  var xhr = new XMLHttpRequest()
-  xhr.open('POST', url + data.definition, true)
-
-  //Send the proper header information along with the request
-  xhr.setRequestHeader('Content-Type', 'application/json')
-
-  xhr.onreadystatechange = function() { // Call a function when the state changes.
-    if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-      // Request finished. Do processing here.
-      let t1 = performance.now()
-      const computeSolveTime = t1 - t0
-      t0 = t1
-
-      // hide spinner
-      document.getElementById('loader').style.display = 'none'
-      let result = JSON.parse(xhr.response)
-      let data = JSON.parse(result.values[0].InnerTree['{ 0; }'][0].data)
-
-      let mesh = rhino.CommonObject.decode(data)
-      
-      t1 = performance.now()
-      const decodeMeshTime = t1 - t0
-      t0 = t1
-
-      let material = new THREE.MeshNormalMaterial()
-      let threeMesh = meshToThreejs(mesh, material)
-      mesh.delete()
-      replaceCurrentMesh(threeMesh)
-
-      t1 = performance.now()
-      const rebuildSceneTime = t1 - t0
-
-      console.log(`[call compute and rebuild scene] = ${Math.round(t1-timeComputeStart)} ms`)
-      console.log(`  ${Math.round(computeSolveTime)} ms: appserver request`)
-      let timings = xhr.getResponseHeader('server-timing').split(',')
-      let sum = 0
-      timings.forEach(element => {
-        let name = element.split(';')[0].trim()
-        let time = element.split('=')[1].trim()
-        sum += Number(time)
-        if (name === 'network') {
-          console.log(`  .. ${time} ms: appserver<->compute network latency`)
-        } else {
-          console.log(`  .. ${time} ms: ${name}`)
-        }
-      })
-      console.log(`  .. ${Math.round(computeSolveTime - sum)} ms: local<->appserver network latency`)
-      console.log(`  ${Math.round(decodeMeshTime)} ms: decode json to rhino3dm mesh`)
-      console.log(`  ${Math.round(rebuildSceneTime)} ms: create threejs mesh and insert in scene`)
-    } else {
-      //console.log(this.status)
-      if(this.status === 500) console.error(xhr)
-    }
+  const request = {
+    'method':'POST',
+    'body': JSON.stringify(data),
+    'headers': {'Content-Type': 'application/json'}
   }
+  let response = await fetch(url + data.definition, request)
 
-  xhr.send(JSON.stringify(data))
+  // Request finished. Do processing here.
+  let t1 = performance.now()
+  const computeSolveTime = t1 - timeComputeStart
+  t0 = t1
+
+  let responseJson = await response.json()
+  let headers = response.headers.get('server-timing')
+
+  {
+    // hide spinner
+    document.getElementById('loader').style.display = 'none'
+    let data = JSON.parse(responseJson.values[0].InnerTree['{ 0; }'][0].data)
+    let mesh = rhino.CommonObject.decode(data)
+      
+    t1 = performance.now()
+    const decodeMeshTime = t1 - t0
+    t0 = t1
+
+    let material = new THREE.MeshNormalMaterial()
+    let threeMesh = meshToThreejs(mesh, material)
+    mesh.delete()
+    replaceCurrentMesh(threeMesh)
+
+    t1 = performance.now()
+    const rebuildSceneTime = t1 - t0
+
+    console.log(`[call compute and rebuild scene] = ${Math.round(t1-timeComputeStart)} ms`)
+    console.log(`  ${Math.round(computeSolveTime)} ms: appserver request`)
+    let timings = headers.split(',')
+    let sum = 0
+    timings.forEach(element => {
+      let name = element.split(';')[0].trim()
+      let time = element.split('=')[1].trim()
+      sum += Number(time)
+      if (name === 'network') {
+        console.log(`  .. ${time} ms: appserver<->compute network latency`)
+      } else {
+        console.log(`  .. ${time} ms: ${name}`)
+      }
+    })
+    console.log(`  .. ${Math.round(computeSolveTime - sum)} ms: local<->appserver network latency`)
+    console.log(`  ${Math.round(decodeMeshTime)} ms: decode json to rhino3dm mesh`)
+    console.log(`  ${Math.round(rebuildSceneTime)} ms: create threejs mesh and insert in scene`)
+  }
 }
 
 /**

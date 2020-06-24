@@ -100,7 +100,7 @@ router.post('/:name', computeParams, function(req, res, next) {
   compute.Grasshopper.evaluateDefinition(definitionPath, trees, false)
     .then(computeResponse => {
       computeServerTiming = computeResponse.headers
-      computeResponse.buffer().then(result=> {
+      computeResponse.json().then(result=> {
         const timeComputeServerCallComplete = performance.now()
 
         let computeTimings = computeServerTiming.get('server-timing')

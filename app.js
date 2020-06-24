@@ -5,6 +5,7 @@ const compression = require('compression')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const cors = require('cors')
+const expressStaticGzip = require('express-static-gzip')
 
 // routers
 const indexRouter = require('./routes/index')
@@ -39,7 +40,10 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(cors())
 app.use(compression())
-app.use('/example', express.static('example'))
+app.use('/example', expressStaticGzip('example', {
+  enableBrotli: true,
+  orderPreference: ['br']
+}))
 
 app.use('/', indexRouter)
 app.use('/definition', definitionRouter)

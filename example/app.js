@@ -1,6 +1,6 @@
 /* eslint no-undef: "off", no-unused-vars: "off" */
 let data = {}
-data.definition = 'BranchNodeRnd.gh'
+data.definition = 'draco_test.gh'
 data.inputs = {
   'RH_IN:201:Length':document.getElementById('length').value,
   'RH_IN:201:Count':document.getElementById('count').value,
@@ -47,7 +47,8 @@ async function compute(){
     // hide spinner
     document.getElementById('loader').style.display = 'none'
     let data = JSON.parse(responseJson.values[0].InnerTree['{ 0; }'][0].data)
-    let mesh = rhino.CommonObject.decode(data)
+    let mesh = rhino.DracoCompression.decompressBase64String(data)
+    // let mesh = rhino.CommonObject.decode(data)
       
     t1 = performance.now()
     const decodeMeshTime = t1 - t0

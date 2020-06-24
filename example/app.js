@@ -33,7 +33,7 @@ async function compute(){
     'body': JSON.stringify(data),
     'headers': {'Content-Type': 'application/json'}
   }
-  let response = await fetch(url + data.definition, request)
+  let response = await fetch(url, request)
 
   // Request finished. Do processing here.
   let t1 = performance.now()

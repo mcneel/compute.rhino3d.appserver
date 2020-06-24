@@ -2,6 +2,9 @@ const express = require('express')
 const router = express.Router()
 const compute = require('compute-rhino3d')
 const {performance} = require('perf_hooks')
+const NodeCache = require('node-cache')
+
+const cache = new NodeCache()
 
 function computeParams (req, res, next){
   compute.url = req.app.get('computeUrl')
@@ -64,6 +67,16 @@ router.get('/:name', computeParams, function(req, res, next){
 // Solve GH definition
 router.post('/:name', computeParams, function(req, res, next) {
   const timePostStart = performance.now()
+  const cacheKey = JSON.stringify(req.body)
+  let cachedResult = cache.get(cacheKey)
+  if (cachedResult) {
+    const timespanPost = Math.round(performance.now() - timePostStart)
+    res.setHeader('Server-Timing', `cacheHit;dur=${timespanPost}`)
+    res.setHeader('Content-Type', 'application/json')
+    res.send(cachedResult)
+    return
+  }
+
   let definition = req.app.get('definitions').find(o => o.name === req.params.name)
   
   if(!definition)
@@ -100,6 +113,8 @@ router.post('/:name', computeParams, function(req, res, next) {
         const timespanComputeNetwork = Math.round(timespanCompute - sum)
         const timespanSetup = Math.round(timePreComputeServerCall - timePostStart)
         const timing = `setup;dur=${timespanSetup}, ${computeTimings}, network;dur=${timespanComputeNetwork}`
+        
+        cache.set(cacheKey, result)
 
         res.setHeader('Server-Timing', timing)
         res.setHeader('Content-Type', 'application/json')

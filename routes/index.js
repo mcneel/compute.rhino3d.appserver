@@ -65,7 +65,7 @@ router.get('/:name', computeParams, function(req, res, next){
 
 
 // Solve GH definition
-router.post('/:name', computeParams, function(req, res, next) {
+router.post('/', computeParams, function(req, res, next) {
   const timePostStart = performance.now()
   const cacheKey = JSON.stringify(req.body)
   let cachedResult = cache.get(cacheKey)
@@ -77,7 +77,7 @@ router.post('/:name', computeParams, function(req, res, next) {
     return
   }
 
-  let definition = req.app.get('definitions').find(o => o.name === req.params.name)
+  let definition = req.app.get('definitions').find(o => o.name === req.body.definition)
   
   if(!definition)
     throw new Error('Definition not found on server.') 

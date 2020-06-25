@@ -1,6 +1,6 @@
 const createError = require('http-errors')
 const express = require('express')
-const compression = require('compression')
+//const compression = require('compression')
 const logger = require('morgan')
 const cors = require('cors')
 
@@ -9,7 +9,7 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cors())
-app.use(compression())
+//app.use(compression())
 
 // Define URL for our compute server
 // - For local debugging on the same computer, compute.geometry.exe is

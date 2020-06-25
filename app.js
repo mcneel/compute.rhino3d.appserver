@@ -1,54 +1,37 @@
 const createError = require('http-errors')
 const express = require('express')
-const path = require('path')
 const compression = require('compression')
-const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const cors = require('cors')
-const expressStaticGzip = require('express-static-gzip')
 
-// routers
-const indexRouter = require('./routes/index')
-const definitionRouter = require('./routes/definition')
-const solveRouter = require('./routes/solve')
-
+// create express web server app
 const app = express()
-
-// get arguments after first two elements in process.argv
-let args = process.argv.splice(2)
-
-let defArgId = args.indexOf('--definitions')
-let urlArgId = args.indexOf('--computeUrl')
-
-// set arguments or accept defaults
-app.set(app.set('definitionsDir', path.join(__dirname, 'files/')))
-if(defArgId > -1)
-  app.set('definitionsDir', path.normalize(args[defArgId+1]))
-  
-app.set('computeUrl', 'http://localhost:8081/')
-if(urlArgId > -1)
-  app.set('computeUrl', args[urlArgId+1])
-else if(process.env.COMPUTE_URL !== undefined)
-  app.set('computeUrl', process.env.COMPUTE_URL) // set to a geometry server running on the same machine. NOTE: Port 8082 is when Geometry Server is running debug
-
-console.log('VERSION: ' + process.env.npm_package_version)
-console.log('COMPUTE_URL: ' + app.get('computeUrl'))
-console.log('NODE_ENV: ' + process.env.NODE_ENV)
-if(process.env.NODE_ENV !== 'production')
-  app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-app.use(cookieParser())
 app.use(cors())
 app.use(compression())
-app.use('/example', expressStaticGzip('example', {
-  enableBrotli: true,
-  orderPreference: ['br']
-}))
 
-app.use('/', indexRouter)
-app.use('/definition', definitionRouter)
-app.use('/solve', solveRouter)
+// Define URL for our compute server
+// - For local debugging on the same computer, compute.geometry.exe is
+//   typically running at http://localhost:8081/
+// - For a production environment it is good to use an environment variable
+//   named COMPUTE_URL to define where the compute server is located
+// - And just in case, you can pass an address as a command line arg
+let computeUrl = process.env.COMPUTE_URL
+const argIndex = process.argv.indexOf('--computeUrl')
+if (argIndex > -1)
+  computeUrl = process.argv[argIndex + 1]
+if (!computeUrl)
+  computeUrl = 'http://localhost:8081/' // default if nothing else exists
+app.set('computeUrl', computeUrl)
+console.log('COMPUTE_URL: ' + app.get('computeUrl'))
+
+// Routes for this app
+app.use('/example', express.static('example'))
+app.use('/', require('./routes/index'))
+app.use('/definition', require('./routes/definition'))
+app.use('/solve', require('./routes/solve'))
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -57,15 +40,18 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-
   // set locals, only providing error in development
   res.locals.message = err.message
   console.log(err.message)
   res.locals.error = req.app.get('env') === 'development' ? err : {}
-
   // send the error
   res.status(err.status || 500)
   res.send(err.message)
 })
+
+// log requests to the terminal when running in a local debug setup
+if(process.env.NODE_ENV !== 'production')
+  app.use(logger('dev'))
+
 
 module.exports = app

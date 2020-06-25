@@ -13,9 +13,20 @@ function computeParams (req, res, next){
   next()
 }
 
-// Solve GH definition
+/**
+ * Solve GH definition
+ * This is the core "workhorse" function for the appserver. Client apps post
+ * json data to the appserver at this endpoint and that json is passed on to
+ * compute for solving with Grasshopper.
+ */
 router.post('/', computeParams, function(req, res, next) {
   const timePostStart = performance.now()
+
+  // ?? Do we need an option to skip caching
+  // Assume the same input will always result in the same output.
+  // In this case, we can cache the answer when the same question is asked.
+  // The current implementation uses a simple in-memory cache. Other
+  // solutions may way to use something like memcached, redis, or a database
   const cacheKey = JSON.stringify(req.body)
   let cachedResult = cache.get(cacheKey)
   if (cachedResult) {
@@ -27,7 +38,6 @@ router.post('/', computeParams, function(req, res, next) {
   }
 
   let definition = req.app.get('definitions').find(o => o.name === req.body.definition)
-  
   if(!definition)
     throw new Error('Definition not found on server.') 
 

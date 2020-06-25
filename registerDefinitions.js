@@ -21,8 +21,13 @@ module.exports = (() => {
   let definitions = []
   files.forEach( file => {
     if(file.includes('.gh') || file.includes('.ghx')) {
-      const hash = md5File.sync(path.join(__dirname, 'files/' + file))
-      definitions.push({name: file, id:hash})
+      const fullPath = path.join(__dirname, 'files/' + file)
+      const hash = md5File.sync(fullPath)
+      definitions.push({
+        name: file,
+        id:hash,
+        path: fullPath
+      })
     }
   })
   return definitions

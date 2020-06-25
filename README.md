@@ -1,5 +1,5 @@
 # Rhino Compute AppServer
-This is a node.js server built with express which shows how to serve a few Grasshopper definitions and expose their remote solving via a basic API.
+A node.js server acting as a bridge between client apps and private compute.rhino3d servers.
 
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/mcneel/compute.rhino3d.appserver/main?label=version&style=flat-square)
 ![node-current (scoped)](https://img.shields.io/node/v/@mcneel/compute.rhino3d.appserver?style=flat-square)
@@ -12,9 +12,9 @@ This is a node.js server built with express which shows how to serve a few Grass
 
 ## Use Cases
 
-You can use this project in several use cases, but they all assume you've setup a Rhino compute server and that server is accessible locally or from another computer. To test this, navigate in a browser to `http://your-compute-server-address/version`. For more information on setting up your compute server, please visit: https://github.com/mcneel/compute.rhino3d/blob/master/docs/installation.md
+All use cases assume you have set up a Rhino compute server. For more information on setting up your compute server, please visit: https://github.com/mcneel/compute.rhino3d/blob/master/docs/installation.md
 
-### Running this app locally
+### Running / Debugging this app locally
 (alongside a compute geometry server)
 1. Open up a terminal. Clone this repository and navigate to the resulting directory: 
 ``` bash
@@ -47,7 +47,7 @@ $ node ./bin/www
 $ node ./bin/www --computeUrl http://localhost:8081/
 ```
 
-### Deploying this app on **Heroku** 
+### Deploying to **Heroku** 
 (with Compute Geometry server running on a Windows Server)
 
 #### Prerequisites

@@ -10,6 +10,7 @@ const expressStaticGzip = require('express-static-gzip')
 // routers
 const indexRouter = require('./routes/index')
 const definitionRouter = require('./routes/definition')
+const solveRouter = require('./routes/solve')
 
 const app = express()
 
@@ -47,6 +48,7 @@ app.use('/example', expressStaticGzip('example', {
 
 app.use('/', indexRouter)
 app.use('/definition', definitionRouter)
+app.use('/solve', solveRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -12,6 +12,8 @@ let url = window.location.href
 url = url.substring(0, url.lastIndexOf('/'))
 url = url.substring(0, url.lastIndexOf('/')) + '/'
 
+let _threeMesh = null
+let _threeMaterial = null // just keep reusing the same material
 
 rhino3dm().then(async m => {
   console.log('Loaded rhino3dm.')
@@ -53,8 +55,10 @@ async function compute(){
     const decodeMeshTime = t1 - t0
     t0 = t1
 
-    let material = new THREE.MeshNormalMaterial()
-    let threeMesh = meshToThreejs(mesh, material)
+    if (!_threeMaterial) {
+      _threeMaterial = new THREE.MeshNormalMaterial()
+    }
+    let threeMesh = meshToThreejs(mesh, _threeMaterial)
     mesh.delete()
     replaceCurrentMesh(threeMesh)
 
@@ -101,7 +105,6 @@ function onSliderChange () {
 // BOILERPLATE //
 
 var scene, camera, renderer, controls
-let _threeMesh = null
 
 function init () {
   scene = new THREE.Scene()
@@ -140,7 +143,6 @@ function replaceCurrentMesh (threeMesh) {
   if (_threeMesh) {
     scene.remove(_threeMesh)
     _threeMesh.geometry.dispose()
-    _threeMesh.material.dispose()
   }
   _threeMesh = threeMesh
   scene.add(_threeMesh)

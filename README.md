@@ -1,95 +1,30 @@
-# Rhino Compute AppServer
-A node.js server acting as a bridge between client apps and private compute.rhino3d servers.
-
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/mcneel/compute.rhino3d.appserver/main?label=version&style=flat-square)
 ![node-current (scoped)](https://img.shields.io/node/v/@mcneel/compute.rhino3d.appserver?style=flat-square)
 
-1. [Use Cases](#use-cases)
-    1. [Running this app locally](#running-this-app-locally)
-    2. [Deploying this app on **Heroku** ](#deploying-this-app-on-heroku)
-2. [API Endpoints](#api-endpoints)
-3. [Example](#example)
+# Rhino Compute AppServer
+A node.js server acting as a bridge between client apps and private compute.rhino3d servers.
 
-## Use Cases
+This app is intended to host one or more custom grasshopper definitions and serve as the API that client applications can call to have definitions solved with modified input parameters.
 
-All use cases assume you have set up a Rhino compute server. For more information on setting up your compute server, please visit: https://github.com/mcneel/compute.rhino3d/blob/master/docs/installation.md
+## Features
+- **Easy to get started**: clone this repo and run it locally for testing or push to a service like Heroku for a production web server
+- **Easy to customize**: fork this repo, place your custom grasshopper definitions in the files directory and you now have a custom AppServer for your definitions.
+- **Caching**: The AppServer assumes that all definitions produce the same results when the same set of inputs are provided. The appserver caches all results in memory for faster response times.
+- **Timings**: Server-timing headers are returned to the client to help you diagnose what portion of the definition solving process may be a bottleneck
 
-### Running / Debugging this app locally
-(alongside a compute geometry server)
-1. Open up a terminal. Clone this repository and navigate to the resulting directory: 
-``` bash
-$ git clone https://github.com/mcneel/compute.rhino3d.appserver.git
-$ cd compute.rhino3d.appserver
-```
-2. Install dependencies:
-```bash
-$ npm install
-```
-3. Start the application from the terminal in development mode. This uses [nodemon](https://nodemon.io/) to restart the server in case you make changes. It also runs the linting script.
-```bash
-# will look for definitions in the ./files/ directory and use http://localhost:8081 as the compute server address
+## Getting Started
+1. Fork this repo
+2. Follow the [installation guide](installation.md) to test and debug on your computer
+3. Follow the [Heroku hosting guide](heroku.md) to push your own AppServer to Heroku and host it as a production web server
 
-$ npm run dev
+## Example
+When we have our testing server up and running, you can visit
 
-# alternatively, if you'd like to define a different address for the compute server (check the 'dev' script in packages.json):
+https://compute-rhino3d-appserver.herokuapp.com/example/
 
-$ nodemon --inspect ./bin/www --computeUrl http://localhost:8081/  --exec \"npm run lint && node\""
-```
-4. Navigate to `http://localhost:3000/example/` to test the example included in this project.
-5. If you'd like to add any definitions, add .gh or .ghx files to the `./files/` directory.
-6. If you'd like to run this application locally without any of the development tools you can use the following:
+To see a sample web application that passes three numbers based on slider positions to the AppServer for solving a grasshopper definition. Results are returned to the web page and new mesh visualizations are created.
 
-```bash
-# uses the ./files/ directory for definitions and http://localhost:8081 as the compute server url (same as "npm run start" defined in package.json)
-$ node ./bin/www
-
-# or with command line arguments (same as "npm run start-args" defined in package.json)
-$ node ./bin/www --computeUrl http://localhost:8081/
-```
-
-### Deploying to **Heroku** 
-(with Compute Geometry server running on a Windows Server)
-
-#### Prerequisites
-1. You have an account on [Heroku](https://heroku.com).
-2. You've downloaded and installed the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli#download-and-install).
-
-#### Setup
-1. If you haven't already done so, open up a terminal, clone this repository, and navigate to the resulting directory: 
-``` bash
-$ git clone https://github.com/mcneel/compute.rhino3d.appserver.git
-$ cd compute.rhino3d.appserver
-```
-2. This example comes with a few definitions in the `./files/` directory. If you would like to add any more definitions, you can do so now.
-3. From the terminal, login to Heroku:
-``` bash
-$ heroku login
-```
-4. From the terminal, create the Heroku application (you can specify a name here, otherwise heroku will assign a name to your app):
-``` bash
-$ heroku create myappname
-```
-You will see that your app was created and has a domain and a git repository:
-```
-Creating myappname... done
-https://myappname.herokuapp.com | https://git.heroku.com/myappname.git
-```
-5. Add configuration variables.
-(This step can also be completed via the Heroku dashboard)
-   - From the terminal, set the `COMPUTE_URL` variable. The VALUE of this should be the address to the server running compute. Ensure this address ends in a `/`.
-   ```bash
-   $ heroku config:set COMPUTE_URL=http://your-compute-server-address/
-   ``` 
-6. Push the code to Heroku:
-```
-$ git push heroku master
-```
-7. Finally, open the application. You should see your browser write some json formated information about the definitions.
-```bash
-$ heroku open
-```
-8. Check out the example at https://myappname.herokuapp.com/example/ 
-9. Navigate in a browser to your [Heroku dashboard](https://dashboard.heroku.com/). There you should see your new application. Click on your application name view it. You can view the logs by clicking on the `More` button and selecting `View logs`.
+----
 
 ## API Endpoints
 
@@ -99,7 +34,7 @@ endpoint | method | return type | description
 `/definitionName.gh` | GET |  `application/json` | displays information about the definition
 `/solve` | POST |  `application/json` | solves a GH definition and returns json data
 
-## Example
+## Client code
 
 To solve a GH definition you need to pass the definition name and input values to the appserver:
 

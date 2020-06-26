@@ -26,7 +26,7 @@ router.post('/', computeParams, function(req, res, next) {
   // Assume the same input will always result in the same output.
   // In this case, we can cache the answer when the same question is asked.
   // The current implementation uses a simple in-memory cache. Other
-  // solutions may way to use something like memcached, redis, or a database
+  // solutions may want to use something like memcached, redis, or a database
   const cacheKey = JSON.stringify(req.body)
   let cachedResult = cache.get(cacheKey)
   if (cachedResult) {

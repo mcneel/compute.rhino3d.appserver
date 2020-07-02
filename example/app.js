@@ -2,9 +2,9 @@
 let data = {}
 data.definition = 'BranchNodeRnd.gh'
 data.inputs = {
-  'RH_IN:201:Length':document.getElementById('length').value,
-  'RH_IN:201:Count':document.getElementById('count').value,
-  'RH_IN:201:Radius':document.getElementById('radius').value
+  'Length':document.getElementById('length').value,
+  'Count':document.getElementById('count').value,
+  'Radius':document.getElementById('radius').value
 }
 
 // set this to the target appserver url
@@ -95,9 +95,9 @@ function onSliderChange () {
 
   // get slider values
   data.inputs = {
-    'RH_IN:201:Length':document.getElementById('length').value,
-    'RH_IN:201:Count':document.getElementById('count').value,
-    'RH_IN:201:Radius':document.getElementById('radius').value
+    'Length':document.getElementById('length').value,
+    'Count':document.getElementById('count').value,
+    'Radius':document.getElementById('radius').value
   }
   compute()
 }

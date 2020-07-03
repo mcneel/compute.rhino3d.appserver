@@ -26,17 +26,17 @@ function commonSolve (req, res, next){
   let params = {}
 
   switch (req.method){
-    case 'GET':
-    case 'HEAD':
-      params.definition = req.params.definition
-      params.inputs = req.query
-      break
-    case 'POST':
-      params = req.body
-      break
-    default:
-      next()
-      break
+  case 'HEAD':
+  case 'GET':
+    params.definition = req.params.definition
+    params.inputs = req.query
+    break
+  case 'POST':
+    params = req.body
+    break
+  default:
+    next()
+    break
   }
 
   // set general headers

@@ -9,7 +9,7 @@ data.inputs = {
 
 // set this to the target appserver url
 let url = window.location.href
-url = url.substring(0, url.lastIndexOf('/'))
+url = url.substring(0, url.length - 1)
 url = url.substring(0, url.lastIndexOf('/')) + '/solve'
 
 let _threeMesh = null

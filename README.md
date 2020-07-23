@@ -15,7 +15,8 @@ This app is intended to host one or more custom grasshopper definitions and serv
 ## Getting Started
 1. Fork this repo
 2. Follow the [installation guide](docs/installation.md) to test and debug on your computer
-3. Follow the [Heroku hosting guide](docs/heroku.md) to push your customized AppServer to Heroku for a production web server
+3. Follow the [installation guide](docs/getting-started.md) to set compute as a web server
+4. Follow the [Heroku hosting guide](docs/heroku.md) to push your customized AppServer to Heroku for a production web server
 
 ## Example
 When we have our testing server up and running, you can visit

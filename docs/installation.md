@@ -4,21 +4,30 @@ You are going to want to be able to have this application run in two different l
 - Run locally for testing and debugging
 - Run on a production web server
 
-## Step 1 - Fork me
-Fork this repo and clone your fork to your desktop so you have something to work with.
+### Pre-requisites
+- Rhino WIP installed
+- Visual Studio Code installed
 
-## Run locally for testing and debugging
-The AppServer requires a copy of Rhino Compute. For running this app locally, that means you need to install and run a copy of compute on your desktop.
-- install Rhino 7
+## Step 1 - Fork the repo
+- Fork [this repo](https://github.com/mcneel/compute.rhino3d.appserver) and clone your fork to your computer so that you can work locally.
+
+`compute.rhino3d.appserver\files` is the folder where the .gh definitions are stored. Note that in the example definition, some components are grouped and named with a specific format:
+- groups with `RH_IN:Name` will be the inputs sent to  _compute_
+- groups with `RH_OUT:Name` will be the outputs return by _compute_ after the definition is computed
+- In both cases, `Name`  is the input/output variable and should be unique
+
+## Step 2 - Run locally for testing and debugging
+The AppServer requires a copy of Rhino Compute. For running this app locally, that means you need to install and run a copy of compute on your computer:
+
 - compile compute.sln found at https://github.com/mcneel/compute.rhino3d/tree/master/src
-- start compute.geometry.exe This is an instance of the compute geometry server running locally on your computer and listening to localhost:8081
+- start `compute.geometry.exe`. This is an instance of the compute geometry server running locally on your computer and listening to localhost:8081
 
 Start VS Code and open your cloned project's directory
 - from terminal run `npm install` to install dependencies
 ```bash
 $ npm install
 ```
-- In VS Code's menu, click on Run->Start Debugging
+- In VS Code's menu, click on Run->Start Debugging using `Launch Program`
 - If everything goes right, the terminal should report that it is listening on port 3000
 - In your browser, navigate to http://localhost:3000/example/ to test out the sample client
 

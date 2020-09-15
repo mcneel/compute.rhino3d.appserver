@@ -17,6 +17,10 @@ This app is intended to host one or more custom grasshopper definitions and serv
 2. Follow the [installation guide](docs/installation.md) to test and debug on your computer
 3. Follow the [Heroku hosting guide](docs/heroku.md) to push your customized AppServer to Heroku for a production web server
 
+## How and What Video
+A workshop on using the appserver can be found at
+https://vimeo.com/442079095
+
 ## Example
 When we have our testing server up and running, you can visit
 

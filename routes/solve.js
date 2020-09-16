@@ -19,33 +19,49 @@ function computeParams (req, res, next){
  * json data to the appserver at this endpoint and that json is passed on to
  * compute for solving with Grasshopper.
  */
-router.post('/', computeParams, function(req, res, next) {
+
+function commonSolve (req, res, next){
   const timePostStart = performance.now()
 
-  // ?? Do we need an option to skip caching
-  // Assume the same input will always result in the same output.
-  // In this case, we can cache the answer when the same question is asked.
-  // The current implementation uses a simple in-memory cache. Other
-  // solutions may want to use something like memcached, redis, or a database
-  const cacheKey = JSON.stringify(req.body)
+  let params = {}
+
+  switch (req.method){
+  case 'HEAD':
+  case 'GET':
+    params.definition = req.params.definition
+    params.inputs = req.query
+    break
+  case 'POST':
+    params = req.body
+    break
+  default:
+    next()
+    break
+  }
+
+  // set general headers
+  // what is the proper max-age, 31536000 = 1 year, 86400 = 1 day
+  res.setHeader('Cache-Control', 'public, max-age=31536000')
+  res.setHeader('Content-Type', 'application/json')
+
+  const cacheKey = JSON.stringify(params)
   let cachedResult = cache.get(cacheKey)
   if (cachedResult) {
     const timespanPost = Math.round(performance.now() - timePostStart)
     res.setHeader('Server-Timing', `cacheHit;dur=${timespanPost}`)
-    res.setHeader('Content-Type', 'application/json')
     res.send(cachedResult)
     return
   }
 
-  let definition = req.app.get('definitions').find(o => o.name === req.body.definition)
+  let definition = req.app.get('definitions').find(o => o.name === params.definition)
   if(!definition)
     throw new Error('Definition not found on server.') 
 
   // set parameters
   let trees = []
-  if(req.body.inputs !== undefined) { // handle no inputs
-    for (let [key, value] of Object.entries(req.body.inputs)) {
-      let param = new compute.Grasshopper.DataTree(key)
+  if(params.inputs !== undefined) { // handle no inputs
+    for (let [key, value] of Object.entries(params.inputs)) {
+      let param = new compute.Grasshopper.DataTree('RH_IN:'+key)
       param.append([0], [value])
       trees.push(param)
     }
@@ -76,13 +92,17 @@ router.post('/', computeParams, function(req, res, next) {
         cache.set(cacheKey, result)
 
         res.setHeader('Server-Timing', timing)
-        res.setHeader('Content-Type', 'application/json')
         res.send(result)
       }).catch( (error) => { 
         console.log(error)
         res.send('error in solve')
       })
     })
-})
+}
+
+// Handle different http methods
+router.head('/:definition',[computeParams,commonSolve]) // do we need this?
+router.get('/:definition', [computeParams,commonSolve])
+router.post('/', [computeParams,commonSolve])
 
 module.exports = router

@@ -2,14 +2,14 @@
 let data = {}
 data.definition = 'BranchNodeRnd.gh'
 data.inputs = {
-  'RH_IN:201:Length':document.getElementById('length').value,
-  'RH_IN:201:Count':document.getElementById('count').value,
-  'RH_IN:201:Radius':document.getElementById('radius').value
+  'Length':document.getElementById('length').value,
+  'Count':document.getElementById('count').value,
+  'Radius':document.getElementById('radius').value
 }
 
 // set this to the target appserver url
 let url = window.location.href
-url = url.substring(0, url.lastIndexOf('/'))
+url = url.substring(0, url.length - 1)
 url = url.substring(0, url.lastIndexOf('/')) + '/solve'
 
 let _threeMesh = null
@@ -95,9 +95,9 @@ function onSliderChange () {
 
   // get slider values
   data.inputs = {
-    'RH_IN:201:Length':document.getElementById('length').value,
-    'RH_IN:201:Count':document.getElementById('count').value,
-    'RH_IN:201:Radius':document.getElementById('radius').value
+    'Length':document.getElementById('length').value,
+    'Count':document.getElementById('count').value,
+    'Radius':document.getElementById('radius').value
   }
   compute()
 }

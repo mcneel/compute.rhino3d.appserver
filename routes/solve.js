@@ -3,6 +3,12 @@ const router = express.Router()
 const compute = require('compute-rhino3d')
 const {performance} = require('perf_hooks')
 const NodeCache = require('node-cache')
+var memjs = require('memjs')
+var mc = memjs.Client.create(process.env.MEMCACHIER_SERVERS, {
+  failover: true,  // default: false
+  timeout: 1,      // default: 0.5 (seconds)
+  keepAlive: true  // default: false
+})
 
 const cache = new NodeCache()
 
@@ -45,13 +51,23 @@ function commonSolve (req, res, next){
   res.setHeader('Content-Type', 'application/json')
 
   const cacheKey = JSON.stringify(params)
-  let cachedResult = cache.get(cacheKey)
+  //let cachedResult = cache.get(cacheKey)
+  mc.get(cacheKey, function(err, val) {
+    if(err == null && val != null) { 
+      const timespanPost = Math.round(performance.now() - timePostStart)
+      res.setHeader('Server-Timing', `cacheHit;dur=${timespanPost}`)
+      res.send(val)
+      return
+    }
+  })
+  /*
   if (cachedResult) {
     const timespanPost = Math.round(performance.now() - timePostStart)
     res.setHeader('Server-Timing', `cacheHit;dur=${timespanPost}`)
     res.send(cachedResult)
     return
   }
+  */
 
   let definition = req.app.get('definitions').find(o => o.name === params.definition)
   if(!definition)
@@ -90,6 +106,10 @@ function commonSolve (req, res, next){
         const timing = `setup;dur=${timespanSetup}, ${computeTimings}, network;dur=${timespanComputeNetwork}`
         
         cache.set(cacheKey, result)
+        mc.set(cacheKey, result, {expires:0}, function(err, val){
+          console.log(err)
+          console.log(val)
+        })
 
         res.setHeader('Server-Timing', timing)
         res.send(result)

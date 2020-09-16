@@ -58,6 +58,59 @@ function commonSolve (req, res, next){
       res.setHeader('Server-Timing', `cacheHit;dur=${timespanPost}`)
       res.send(val)
       return
+    } else {
+
+      let definition = req.app.get('definitions').find(o => o.name === params.definition)
+      if(!definition)
+        throw new Error('Definition not found on server.') 
+
+      // set parameters
+      let trees = []
+      if(params.inputs !== undefined) { // handle no inputs
+        for (let [key, value] of Object.entries(params.inputs)) {
+          let param = new compute.Grasshopper.DataTree('RH_IN:'+key)
+          param.append([0], [value])
+          trees.push(param)
+        }
+      }
+
+      let fullUrl = req.protocol + '://' + req.get('host')
+      let definitionPath = `${fullUrl}/definition/${definition.id}`
+      const timePreComputeServerCall = performance.now()
+      let computeServerTiming = null
+
+      // call compute server
+      compute.Grasshopper.evaluateDefinition(definitionPath, trees, false)
+        .then(computeResponse => {
+          computeServerTiming = computeResponse.headers
+          computeResponse.text().then(result=> {
+            const timeComputeServerCallComplete = performance.now()
+
+            let computeTimings = computeServerTiming.get('server-timing')
+            let sum = 0
+            computeTimings.split(',').forEach(element => {
+              let t = element.split('=')[1].trim()
+              sum += Number(t)
+            })
+            const timespanCompute = timeComputeServerCallComplete - timePreComputeServerCall
+            const timespanComputeNetwork = Math.round(timespanCompute - sum)
+            const timespanSetup = Math.round(timePreComputeServerCall - timePostStart)
+            const timing = `setup;dur=${timespanSetup}, ${computeTimings}, network;dur=${timespanComputeNetwork}`
+            
+            cache.set(cacheKey, result)
+            mc.set(cacheKey, result, {expires:0}, function(err, val){
+              console.log(err)
+              console.log(val)
+            })
+
+            res.setHeader('Server-Timing', timing)
+            res.send(result)
+          }).catch( (error) => { 
+            console.log(error)
+            res.send('error in solve')
+          })
+        })
+
     }
   })
   /*
@@ -69,55 +122,12 @@ function commonSolve (req, res, next){
   }
   */
 
-  let definition = req.app.get('definitions').find(o => o.name === params.definition)
-  if(!definition)
-    throw new Error('Definition not found on server.') 
+  
 
-  // set parameters
-  let trees = []
-  if(params.inputs !== undefined) { // handle no inputs
-    for (let [key, value] of Object.entries(params.inputs)) {
-      let param = new compute.Grasshopper.DataTree('RH_IN:'+key)
-      param.append([0], [value])
-      trees.push(param)
-    }
-  }
+  
 
-  let fullUrl = req.protocol + '://' + req.get('host')
-  let definitionPath = `${fullUrl}/definition/${definition.id}`
-  const timePreComputeServerCall = performance.now()
-  let computeServerTiming = null
-  // call compute server
-  compute.Grasshopper.evaluateDefinition(definitionPath, trees, false)
-    .then(computeResponse => {
-      computeServerTiming = computeResponse.headers
-      computeResponse.text().then(result=> {
-        const timeComputeServerCallComplete = performance.now()
-
-        let computeTimings = computeServerTiming.get('server-timing')
-        let sum = 0
-        computeTimings.split(',').forEach(element => {
-          let t = element.split('=')[1].trim()
-          sum += Number(t)
-        })
-        const timespanCompute = timeComputeServerCallComplete - timePreComputeServerCall
-        const timespanComputeNetwork = Math.round(timespanCompute - sum)
-        const timespanSetup = Math.round(timePreComputeServerCall - timePostStart)
-        const timing = `setup;dur=${timespanSetup}, ${computeTimings}, network;dur=${timespanComputeNetwork}`
-        
-        cache.set(cacheKey, result)
-        mc.set(cacheKey, result, {expires:0}, function(err, val){
-          console.log(err)
-          console.log(val)
-        })
-
-        res.setHeader('Server-Timing', timing)
-        res.send(result)
-      }).catch( (error) => { 
-        console.log(error)
-        res.send('error in solve')
-      })
-    })
+  
+  
 }
 
 // Handle different http methods

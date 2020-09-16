@@ -33,7 +33,7 @@ https://myappname.herokuapp.com | https://git.heroku.com/myappname.git
    ``` 
 6. Push the code to Heroku:
 ```
-$ git push heroku master
+$ git push heroku main
 ```
 7. Finally, open the application. You should see your browser write some json formated information about the definitions.
 ```bash

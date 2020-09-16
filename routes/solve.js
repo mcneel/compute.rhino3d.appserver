@@ -54,6 +54,7 @@ function commonSolve (req, res, next){
   //let cachedResult = cache.get(cacheKey)
   mc.get(cacheKey, function(err, val) {
     if(err == null && val != null) { 
+      console.log('hit memcache')
       const timespanPost = Math.round(performance.now() - timePostStart)
       res.setHeader('Server-Timing', `cacheHit;dur=${timespanPost}`)
       res.send(val)

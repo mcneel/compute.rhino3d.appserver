@@ -7,11 +7,17 @@ const NodeCache = require('node-cache')
 const cache = new NodeCache()
 
 const memjs = require('memjs')
-const mc = memjs.Client.create(process.env.MEMCACHIER_SERVERS, {
-  failover: true,  // default: false
-  timeout: 1,      // default: 0.5 (seconds)
-  keepAlive: true  // default: false
-})
+let mc = null
+
+// In case you have a local memached server
+// process.env.MEMCACHIER_SERVERS = '127.0.0.1:11211'
+if(process.env.MEMCACHIER_SERVERS !== undefined) {
+  mc = memjs.Client.create(process.env.MEMCACHIER_SERVERS, {
+    failover: true,  // default: false
+    timeout: 1,      // default: 0.5 (seconds)
+    keepAlive: true  // default: false
+  })
+}
 
 function computeParams (req, res, next){
   compute.url = req.app.get('computeUrl')
@@ -19,6 +25,11 @@ function computeParams (req, res, next){
   compute.apiKey = process.env.RHINO_COMPUTE_KEY
   next()
 }
+
+/**
+ * Collect request parameters
+ * This middleware function stores request parameters in the same manner no matter the request method
+ */
 
 function collectParams (req, res, next){
   res.locals.params = {}
@@ -40,27 +51,32 @@ function collectParams (req, res, next){
 
 }
 
+/**
+ * Check cache
+ * This middleware function checks if a cache value exist for a cache key
+ */
+
 function checkCache (req, res, next){
 
   res.locals.cacheKey = JSON.stringify(res.locals.params)
+  res.locals.cacheResult = null
 
-  console.log('cachekey: ' + res.locals.cacheKey)
-
-  console.log('memcasher server: ' + process.env.MEMCACHIER_SERVERS)
-  if(process.env.MEMCACHIER_SERVERS === undefined){
+  if(mc === null){
     // use node cache
-    res.locals.cacheResult = cache.get(res.locals.cacheKey)
+    const result = cache.get(res.locals.cacheKey)
+    res.locals.cacheResult = result !== undefined ? result : null
     next()
   } else {
     // use memcached
-    mc.get(res.locals.cacheKey, function(err, val) {
-      if(err == null && val != null) {
-        res.locals.cacheResult = val
+    if(mc !== null) {
+      mc.get(res.locals.cacheKey, function(err, val) {
+        if(err == null) {
+          res.locals.cacheResult = val
+        }
         next()
-      }
-    })
+      })
+    }
   }
-  next()
 }
 
 /**
@@ -78,9 +94,8 @@ function commonSolve (req, res, next){
   res.setHeader('Cache-Control', 'public, max-age=31536000')
   res.setHeader('Content-Type', 'application/json')
 
-  console.log('cacheResult ' + res.locals.cacheResult)
-
-  if(res.locals.cacheResult !== undefined) {
+  if(res.locals.cacheResult !== null) {
+    //send
     const timespanPost = Math.round(performance.now() - timePostStart)
     res.setHeader('Server-Timing', `cacheHit;dur=${timespanPost}`)
     res.send(res.locals.cacheResult)
@@ -106,15 +121,12 @@ function commonSolve (req, res, next){
     const timePreComputeServerCall = performance.now()
     let computeServerTiming = null
 
-
-
     // call compute server
     compute.Grasshopper.evaluateDefinition(definitionPath, trees, false)
       .then(computeResponse => {
         computeServerTiming = computeResponse.headers
         computeResponse.text().then(result=> {
 
-          console.log(result)
           const timeComputeServerCallComplete = performance.now()
 
           let computeTimings = computeServerTiming.get('server-timing')
@@ -128,11 +140,14 @@ function commonSolve (req, res, next){
           const timespanSetup = Math.round(timePreComputeServerCall - timePostStart)
           const timing = `setup;dur=${timespanSetup}, ${computeTimings}, network;dur=${timespanComputeNetwork}`
           
-          cache.set(res.locals.cacheKey, result)
-          mc.set(res.locals.cacheKey, result, {expires:0}, function(err, val){
-            console.log(err)
-            console.log(val)
-          })
+          if(mc !== null) {
+            mc.set(res.locals.cacheKey, result, {expires:0}, function(err, val){
+              //console.log(err)
+              //console.log(val)
+            })
+          } else {
+            cache.set(res.locals.cacheKey, result)
+          }
 
           res.setHeader('Server-Timing', timing)
           res.send(result)
@@ -144,19 +159,11 @@ function commonSolve (req, res, next){
   }
 }
 
-/*
-if (cachedResult) {
-  const timespanPost = Math.round(performance.now() - timePostStart)
-  res.setHeader('Server-Timing', `cacheHit;dur=${timespanPost}`)
-  res.send(cachedResult)
-  return
-}
-*/
-
+// Collect middleware functions into a pipeline
 const pipeline = [computeParams, collectParams, checkCache, commonSolve]
 
 // Handle different http methods
-router.head('/:definition',pipeline) // do we need this?
+router.head('/:definition',pipeline) // do we need HEAD?
 router.get('/:definition', pipeline)
 router.post('/', pipeline)
 

@@ -9,6 +9,8 @@ const cache = new NodeCache()
 const memjs = require('memjs')
 let mc = null
 
+let definition = null
+
 // In case you have a local memached server
 // process.env.MEMCACHIER_SERVERS = '127.0.0.1:11211'
 if(process.env.MEMCACHIER_SERVERS !== undefined) {
@@ -21,7 +23,6 @@ if(process.env.MEMCACHIER_SERVERS !== undefined) {
 
 function computeParams (req, res, next){
   compute.url = req.app.get('computeUrl')
-  compute.authToken = process.env.COMPUTE_TOKEN
   compute.apiKey = process.env.RHINO_COMPUTE_KEY
   next()
 }
@@ -46,6 +47,13 @@ function collectParams (req, res, next){
     next()
     break
   }
+
+  definition = req.app.get('definitions').find(o => o.name === res.locals.params.definition)
+  if(!definition)
+      throw new Error('Definition not found on server.')
+
+  //replace definition data with object that includes definition hash
+  res.locals.params.definition = definition
 
   next()
 
@@ -102,10 +110,6 @@ function commonSolve (req, res, next){
     return
   } else {
     //solve
-    let definition = req.app.get('definitions').find(o => o.name === res.locals.params.definition)
-    if(!definition)
-      throw new Error('Definition not found on server.')
-
     // set parameters
     let trees = []
     if(res.locals.params.inputs !== undefined) { //TODO: handle no inputs
@@ -141,11 +145,13 @@ function commonSolve (req, res, next){
           const timing = `setup;dur=${timespanSetup}, ${computeTimings}, network;dur=${timespanComputeNetwork}`
           
           if(mc !== null) {
+            //set memcached
             mc.set(res.locals.cacheKey, result, {expires:0}, function(err, val){
               //console.log(err)
               //console.log(val)
             })
           } else {
+            //set node-cache
             cache.set(res.locals.cacheKey, result)
           }
 

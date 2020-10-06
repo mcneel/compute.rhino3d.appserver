@@ -71,11 +71,13 @@ function checkCache (req, res, next){
 
   if(mc === null){
     // use node cache
+    console.log('using node-cache')
     const result = cache.get(res.locals.cacheKey)
     res.locals.cacheResult = result !== undefined ? result : null
     next()
   } else {
     // use memcached
+    console.log('using memcached')
     if(mc !== null) {
       mc.get(res.locals.cacheKey, function(err, val) {
         if(err == null) {
@@ -104,12 +106,14 @@ function commonSolve (req, res, next){
 
   if(res.locals.cacheResult !== null) {
     //send
+    //console.log(res.locals.cacheResult)
     const timespanPost = Math.round(performance.now() - timePostStart)
     res.setHeader('Server-Timing', `cacheHit;dur=${timespanPost}`)
     res.send(res.locals.cacheResult)
     return
   } else {
     //solve
+    console.log('solving')
     // set parameters
     let trees = []
     if(res.locals.params.inputs !== undefined) { //TODO: handle no inputs

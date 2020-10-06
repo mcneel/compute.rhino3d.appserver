@@ -30,6 +30,8 @@ async function compute(){
   let t0 = performance.now()
   const timeComputeStart = t0
 
+  console.log(data.inputs)
+
   const request = {
     'method':'POST',
     'body': JSON.stringify(data),
@@ -50,7 +52,6 @@ async function compute(){
   {
     // hide spinner
     document.getElementById('loader').style.display = 'none'
-    console.log(responseJson)
     let data = JSON.parse(responseJson.values[0].InnerTree['{ 0; }'][0].data)
     let mesh = rhino.DracoCompression.decompressBase64String(data)
       

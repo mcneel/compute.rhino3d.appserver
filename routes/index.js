@@ -4,7 +4,6 @@ const compute = require('compute-rhino3d')
 
 function computeParams (req, res, next){
   compute.url = req.app.get('computeUrl')
-  compute.authToken = process.env.COMPUTE_TOKEN
   compute.apiKey = process.env.RHINO_COMPUTE_KEY
   next()
 }
@@ -42,6 +41,9 @@ router.get('/:name', computeParams, function(req, res, next){
 
       data.inputs = inputs
       data.outputs = outputs
+
+      definition.inputs = inputs
+      definition.outputs = outputs
 
       res.setHeader('Content-Type', 'application/json')
       res.send(JSON.stringify(data))

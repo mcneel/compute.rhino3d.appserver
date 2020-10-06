@@ -22,14 +22,14 @@ app.use(compression())
 // - For a production environment it is good to use an environment variable
 //   named COMPUTE_URL to define where the compute server is located
 // - And just in case, you can pass an address as a command line arg
-let computeUrl = process.env.COMPUTE_URL
+let computeUrl = process.env.RHINO_COMPUTE_URL
 const argIndex = process.argv.indexOf('--computeUrl')
 if (argIndex > -1)
   computeUrl = process.argv[argIndex + 1]
 if (!computeUrl)
   computeUrl = 'http://localhost:8081/' // default if nothing else exists
 app.set('computeUrl', computeUrl)
-console.log('COMPUTE_URL: ' + app.get('computeUrl'))
+console.log('RHINO_COMPUTE_URL: ' + app.get('computeUrl'))
 
 // Routes for this app
 app.use('/example', express.static('example'))

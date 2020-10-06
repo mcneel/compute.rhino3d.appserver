@@ -29,7 +29,7 @@ if (argIndex > -1)
 if (!computeUrl)
   computeUrl = 'http://localhost:8081/' // default if nothing else exists
 app.set('computeUrl', computeUrl)
-console.log('COMPUTE_URL: ' + app.get('computeUrl'))
+console.log('RHINO_COMPUTE_URL: ' + app.get('computeUrl'))
 
 // Routes for this app
 app.use('/example', express.static('example'))

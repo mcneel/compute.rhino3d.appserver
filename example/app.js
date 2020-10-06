@@ -2,9 +2,9 @@
 let data = {}
 data.definition = 'BranchNodeRnd.gh'
 data.inputs = {
-  'Length':document.getElementById('length').value,
-  'Count':document.getElementById('count').value,
-  'Radius':document.getElementById('radius').value
+  'Count':document.getElementById('count').valueAsNumber,
+  'Radius':document.getElementById('radius').valueAsNumber,
+  'Length':document.getElementById('length').valueAsNumber
 }
 
 // set this to the target appserver url
@@ -30,13 +30,13 @@ async function compute(){
   let t0 = performance.now()
   const timeComputeStart = t0
 
-  console.log(data.inputs)
-
   const request = {
     'method':'POST',
     'body': JSON.stringify(data),
     'headers': {'Content-Type': 'application/json'}
   }
+
+
   let response = await fetch(url, request)
 
   // Request finished. Do processing here.
@@ -98,9 +98,9 @@ function onSliderChange () {
 
   // get slider values
   data.inputs = {
-    'Length':document.getElementById('length').value,
-    'Count':document.getElementById('count').value,
-    'Radius':document.getElementById('radius').value
+    'Count':document.getElementById('count').valueAsNumber,
+    'Radius':document.getElementById('radius').valueAsNumber,
+    'Length':document.getElementById('length').valueAsNumber
   }
   compute()
 }

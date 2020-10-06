@@ -9,7 +9,7 @@
     </head>
     <body>
         <button id="solveButton" name="button" onclick="init()">Press me</button>
-
+        <div id="log"></div>
         <script>
             function init() {
                 
@@ -46,23 +46,29 @@
                 params.length.step = 1
                 params.length.cnt = ( params.length.max - params.length.min ) / params.length.step
 
-                warmUp(params).then( ()=>{ console.log('done') } )
+                warmUp(params).then( ()=>{ 
+                    console.log('done')
+                    document.getElementById('log').textContent = 'done'
+                } )
 
             }
             
             async function warmUp( params ) {
 
-                const total = params.count.cnt * params.radius.cnt * params.length.cnt
+                let logDiv = document.getElementById('log')
+
+                const total = ( ( params.count.cnt + 1 ) * ( params.radius.cnt +1 ) * ( params.length.cnt +1 ) ) - 1
 
                 let cnt = 0
 
-                for (let i = params.count.min; i < params.count.max; i = i + params.count.step) {
+                for (let i = params.count.min; i <= params.count.max; i = i + params.count.step) {
 
-                    for (let j = params.radius.min; j < params.radius.max; j = j + params.radius.step) {
+                    for (let j = params.radius.min; j <= params.radius.max; j = j + params.radius.step) {
                     
-                        for (let k = params.length.min; k < params.length.max; k = k + params.length.step) {
+                        for (let k = params.length.min; k <= params.length.max; k = k + params.length.step) {
 
                             console.log(`Solution: ${cnt} / ${total}`)
+                            logDiv.textContent = `Solution: ${cnt} / ${total}`
                             console.log(`Params: Count ${i} - Radius ${j} - Length ${k}`)
 
                             let data = {}

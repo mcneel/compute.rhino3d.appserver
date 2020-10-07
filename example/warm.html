@@ -1,0 +1,112 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
+        <link rel="manifest" href="favicon/site.webmanifest">
+        <title>Compute RestHopper Test</title>
+    </head>
+    <body>
+        <button id="solveButton" name="button" onclick="run()">Press me</button>
+        <div id="log" style="font-family: sans-serif;"></div>
+        <script>
+
+            let logDiv = document.getElementById('log')
+            let total = 0
+            let params = {}
+
+            init()
+
+            function init() {
+
+                // set this to the target appserver url
+                let url = window.location.href
+                url = url.substring(0, url.lastIndexOf('/'))
+                url = url.substring(0, url.lastIndexOf('/')) + '/solve'
+
+                params.definition = 'BranchNodeRnd.gh'
+                params.url = url
+
+                // The min, max, and step values below should match the values used for the input sliders in index.html
+
+                //count
+                params.count = {}
+                params.count.min = 0
+                params.count.max = 100
+                params.count.step = 10
+                params.count.cnt = ( params.count.max - params.count.min ) / params.count.step
+
+                //radius
+                params.radius = {}
+                params.radius.min = 1
+                params.radius.max = 10
+                params.radius.step = 1
+                params.radius.cnt = ( params.radius.max - params.radius.min ) / params.radius.step
+
+                //length
+                params.length = {}
+                params.length.min = 1
+                params.length.max = 10
+                params.length.step = 1
+                params.length.cnt = ( params.length.max - params.length.min ) / params.length.step
+
+                total = ( ( params.count.cnt + 1 ) * ( params.radius.cnt + 1 ) * ( params.length.cnt + 1 ) )
+
+                logDiv.textContent = 'Solutions to solve: ' + total
+
+            }
+
+            function run() {
+
+                document.getElementById('solveButton').disabled = true
+
+                warmUp().then( ()=>{ 
+                    console.log('done')
+                    logDiv.textContent = 'done'
+                } )
+            }
+            
+            async function warmUp() {
+
+                let cnt = 1
+
+                for (let i = params.count.min; i <= params.count.max; i = i + params.count.step) {
+
+                    for (let j = params.radius.min; j <= params.radius.max; j = j + params.radius.step) {
+                    
+                        for (let k = params.length.min; k <= params.length.max; k = k + params.length.step) {
+
+                            console.log(`Solution: ${cnt} / ${total}`)
+                            logDiv.textContent = `Solution: ${cnt} / ${total}`
+                            console.log(`Params: Count ${i} - Radius ${j} - Length ${k}`)
+
+                            let data = {}
+                            data.definition = params.definition
+                            data.inputs = {
+                                'Count': i,
+                                'Radius': j,
+                                'Length': k
+                            }
+
+                            const request = {
+                                'method':'POST',
+                                'body': JSON.stringify(data),
+                                'headers': {'Content-Type': 'application/json'}
+                            }
+
+                            let response = await fetch(params.url, request)
+                            let responseJson = await response.json()
+
+                            cnt ++
+
+                        }
+
+                    }
+
+                }
+
+            }
+        </script>
+    </body>
+</html>

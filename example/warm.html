@@ -32,21 +32,21 @@
                 params.count.min = 0
                 params.count.max = 100
                 params.count.step = 10
-                params.count.cnt = ( params.count.max - params.count.min ) + 1 / params.count.step
+                params.count.cnt = ( params.count.max - params.count.min ) / params.count.step
 
                 //radius
                 params.radius = {}
                 params.radius.min = 1
                 params.radius.max = 10
                 params.radius.step = 1
-                params.radius.cnt = ( params.radius.max - params.radius.min ) + 1 / params.radius.step
+                params.radius.cnt = ( params.radius.max - params.radius.min ) / params.radius.step
 
                 //length
                 params.length = {}
                 params.length.min = 1
                 params.length.max = 10
                 params.length.step = 1
-                params.length.cnt = ( params.length.max - params.length.min ) + 1 / params.length.step
+                params.length.cnt = ( params.length.max - params.length.min ) / params.length.step
 
                 warmUp(params).then( ()=>{ 
                     console.log('done')
@@ -59,7 +59,7 @@
 
                 let logDiv = document.getElementById('log')
 
-                const total = ( params.count.cnt * params.radius.cnt * params.length.cnt ) - 1
+                const total = ( ( params.count.cnt + 1 ) * ( params.radius.cnt + 1 ) * ( params.length.cnt + 1 ) ) - 1
 
                 let cnt = 0
 

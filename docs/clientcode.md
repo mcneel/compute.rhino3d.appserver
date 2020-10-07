@@ -1,5 +1,7 @@
 ## Client code
 
+Please review the [example code](/example) we include in this repository.
+
 To solve a GH definition you need to pass the definition name and input values to the appserver:
 
 ```javascript

@@ -22,7 +22,7 @@ if(process.env.MEMCACHIER_SERVERS !== undefined) {
 }
 
 function computeParams (req, res, next){
-  compute.url = req.app.get('computeUrl')
+  compute.url = process.env.RHINO_COMPUTE_URL
   compute.apiKey = process.env.RHINO_COMPUTE_KEY
   next()
 }
@@ -50,7 +50,7 @@ function collectParams (req, res, next){
 
   definition = req.app.get('definitions').find(o => o.name === res.locals.params.definition)
   if(!definition)
-      throw new Error('Definition not found on server.')
+    throw new Error('Definition not found on server.')
 
   //replace definition data with object that includes definition hash
   res.locals.params.definition = definition
@@ -135,6 +135,12 @@ function commonSolve (req, res, next){
     // call compute server
     compute.Grasshopper.evaluateDefinition(definitionPath, trees, false)
       .then(computeResponse => {
+        /*
+        TODO: Catch server errors from compute
+        if(computeResponse.status === 500) {
+          throw new Error(computeResponse.statusText)
+        }
+        */
         computeServerTiming = computeResponse.headers
         computeResponse.text().then(result=> {
 
@@ -154,8 +160,8 @@ function commonSolve (req, res, next){
           if(mc !== null) {
             //set memcached
             mc.set(res.locals.cacheKey, result, {expires:0}, function(err, val){
-              //console.log(err)
-              //console.log(val)
+              console.log(err)
+              console.log(val)
             })
           } else {
             //set node-cache

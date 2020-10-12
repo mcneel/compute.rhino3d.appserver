@@ -31,15 +31,15 @@ $ npm run dev
 
 # alternatively, if you'd like to define a different address for the compute server (check the 'dev' script in packages.json):
 
-$ nodemon --inspect ./bin/www --computeUrl http://localhost:8081/  --exec \"npm run lint && node\""
+$ nodemon --inspect ./src/bin/www --computeUrl http://localhost:8081/  --exec \"npm run lint && node\""
 ```
 
 - If you'd like to run this application locally without any of the development tools you can use the following:
 
 ```bash
 # uses the ./files/ directory for definitions and http://localhost:8081 as the compute server url (same as "npm run start" defined in package.json)
-$ node ./bin/www
+$ node ./src/bin/www
 
 # or with command line arguments (same as "npm run start-args" defined in package.json)
-$ node ./bin/www --computeUrl http://localhost:8081/
+$ node ./src/bin/www --computeUrl http://localhost:8081/
 ```

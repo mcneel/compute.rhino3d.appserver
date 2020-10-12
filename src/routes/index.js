@@ -3,7 +3,7 @@ const router = express.Router()
 const compute = require('compute-rhino3d')
 
 function computeParams (req, res, next){
-  compute.url = req.app.get('computeUrl')
+  compute.url = process.env.RHINO_COMPUTE_URL
   compute.apiKey = process.env.RHINO_COMPUTE_KEY
   next()
 }

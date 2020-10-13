@@ -133,48 +133,47 @@ function commonSolve (req, res, next){
     let computeServerTiming = null
 
     // call compute server
-    compute.Grasshopper.evaluateDefinition(definitionPath, trees, false)
-      .then(computeResponse => {
-        /*
-        TODO: Catch server errors from compute
-        if(computeResponse.status === 500) {
-          throw new Error(computeResponse.statusText)
-        }
-        */
-        computeServerTiming = computeResponse.headers
-        computeResponse.text().then(result=> {
+    compute.Grasshopper.evaluateDefinition(definitionPath, trees, false).then( (response) => {
+        
+      // Throw error if response not ok
+      if(!response.ok) {
+        throw new Error(response.statusText)
+      } else {
+        computeServerTiming = response.headers
+        return response.text()
+      }
 
-          const timeComputeServerCallComplete = performance.now()
+    }).then( (result) => {
 
-          let computeTimings = computeServerTiming.get('server-timing')
-          let sum = 0
-          computeTimings.split(',').forEach(element => {
-            let t = element.split('=')[1].trim()
-            sum += Number(t)
-          })
-          const timespanCompute = timeComputeServerCallComplete - timePreComputeServerCall
-          const timespanComputeNetwork = Math.round(timespanCompute - sum)
-          const timespanSetup = Math.round(timePreComputeServerCall - timePostStart)
-          const timing = `setup;dur=${timespanSetup}, ${computeTimings}, network;dur=${timespanComputeNetwork}`
-          
-          if(mc !== null) {
-            //set memcached
-            mc.set(res.locals.cacheKey, result, {expires:0}, function(err, val){
-              console.log(err)
-              console.log(val)
-            })
-          } else {
-            //set node-cache
-            cache.set(res.locals.cacheKey, result)
-          }
+      const timeComputeServerCallComplete = performance.now()
 
-          res.setHeader('Server-Timing', timing)
-          res.send(result)
-        }).catch( (error) => { 
-          console.log(error)
-          res.send('error in solve')
-        })
+      let computeTimings = computeServerTiming.get('server-timing')
+      let sum = 0
+      computeTimings.split(',').forEach(element => {
+        let t = element.split('=')[1].trim()
+        sum += Number(t)
       })
+      const timespanCompute = timeComputeServerCallComplete - timePreComputeServerCall
+      const timespanComputeNetwork = Math.round(timespanCompute - sum)
+      const timespanSetup = Math.round(timePreComputeServerCall - timePostStart)
+      const timing = `setup;dur=${timespanSetup}, ${computeTimings}, network;dur=${timespanComputeNetwork}`
+        
+      if(mc !== null) {
+        //set memcached
+        mc.set(res.locals.cacheKey, result, {expires:0}, function(err, val){
+          console.log(err)
+          console.log(val)
+        })
+      } else {
+        //set node-cache
+        cache.set(res.locals.cacheKey, result)
+      }
+
+      res.setHeader('Server-Timing', timing)
+      res.send(result)
+    }).catch( (error) => { 
+      next(error)
+    })
   }
 }
 

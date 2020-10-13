@@ -38,18 +38,25 @@ async function compute(){
     'headers': {'Content-Type': 'application/json'}
   }
 
+  let headers = null
 
-  let response = await fetch(url, request)
+  await fetch(url, request).then( (response) => {
+    if(!response.ok)
+      throw new Error(response.statusText)
+    else {
+      headers = response.headers.get('server-timing')
+      return response.json()
+    }
+  }).then( (responseJson) => {
 
-  // Request finished. Do processing here.
-  let t1 = performance.now()
-  const computeSolveTime = t1 - timeComputeStart
-  t0 = t1
+    // Request finished. Do processing here.
+    let t1 = performance.now()
+    const computeSolveTime = t1 - timeComputeStart
+    t0 = t1
 
-  let responseJson = await response.json()
-  let headers = response.headers.get('server-timing')
+    //let responseJson = await response.json()
+    //let headers = response.headers.get('server-timing')
 
-  {
     // hide spinner
     document.getElementById('loader').style.display = 'none'
     let data = JSON.parse(responseJson.values[0].InnerTree['{ 0; }'][0].data)
@@ -86,7 +93,12 @@ async function compute(){
     console.log(`  .. ${Math.round(computeSolveTime - sum)} ms: local<->appserver network latency`)
     console.log(`  ${Math.round(decodeMeshTime)} ms: decode json to rhino3dm mesh`)
     console.log(`  ${Math.round(rebuildSceneTime)} ms: create threejs mesh and insert in scene`)
-  }
+
+  }).catch( (error) => {
+    console.error(error)
+  })
+
+  
 }
 
 /**

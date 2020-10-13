@@ -34,7 +34,16 @@ router.get('/:name', computeParams, function(req, res, next){
     let fullUrl = req.protocol + '://' + req.get('host')
     let definitionPath = `${fullUrl}/definition/${definition.id}`
     
-    compute.computeFetch('io', {'pointer':definitionPath}).then(result => {
+    compute.computeFetch('io', {'pointer':definitionPath}, false).then( (response) => {
+
+      // Throw error if response not ok
+      if(!response.ok) {
+        throw new Error(response.statusText)
+      } else {
+        return response.json()
+      }
+
+    }).then( (result) => {
 
       let inputs = result.Inputs === undefined ? result.InputNames : result.Inputs
       let outputs = result.Outputs === undefined ? result.OutputNames: result.Outputs
@@ -45,12 +54,10 @@ router.get('/:name', computeParams, function(req, res, next){
       definition.inputs = inputs
       definition.outputs = outputs
 
-      res.setHeader('Content-Type', 'application/json')
-      res.send(JSON.stringify(data))
-
-    }).catch( (error) => console.log(error))
-
-
+      res.json(data)
+    }).catch( (error) => {
+      next(error)
+    }) 
   } else {
     data.inputs = definition.inputs
     data.outputs = definition.outputs

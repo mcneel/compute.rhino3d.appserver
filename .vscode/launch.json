@@ -12,7 +12,7 @@
                 "<node_internals>/**"
             ],
             "autoAttachChildProcesses": true,
-            "program": "${workspaceFolder}\\bin\\www"
+            "program": "${workspaceFolder}/src/bin/www"
         }
     ]
 }

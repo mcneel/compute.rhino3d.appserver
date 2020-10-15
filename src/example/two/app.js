@@ -174,5 +174,3 @@ function zoomCameraToSelection( camera, controls, selection, fitOffset = 1.2 ) {
   controls.update();
   
 }
-
-export { onSliderChange }

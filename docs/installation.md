@@ -4,25 +4,29 @@ You are going to want to be able to have this application run in two different l
 - Run locally for testing and debugging
 - Run on a production web server
 
-## Step 1 - Fork me
-Fork this repo and clone your fork to your desktop so you have something to work with.
+## Step 1 - Install Rhino 7 and Rhino.Compute
+AppServer requires Rhino 7 and Rhino.Compute. Please see the ["Developing with Rhino Compute"](https://github.com/mcneel/compute.rhino3d/blob/master/docs/develop.md) guide for instructions. Ensure Rhino.Compute (compute.geometry.exe) has started and is listening on http://localhost:8081
 
-## Run locally for testing and debugging
-The AppServer requires a copy of Rhino Compute. For running this app locally, that means you need to install and run a copy of compute on your desktop.
-- install Rhino 7
-- compile compute.sln found at https://github.com/mcneel/compute.rhino3d/tree/master/src
-- start compute.geometry.exe This is an instance of the compute geometry server running locally on your computer and listening to localhost:8081
-
-Start VS Code and open your cloned project's directory
-- from terminal run `npm install` to install dependencies
+## Step 2 - Git this repository and install dependencies
+Clone this repository and install dependencies
 ```bash
-$ npm install
+$ git clone https://github.com/mcneel/compute.rhino3d.appserver.git
+$ cd compute.rhino3d.appserver
+$ npm i
 ```
-- In VS Code's menu, click on Run->Start Debugging
+## Step 3 - Start project
+- From a terminal, run:
+```bash
+$ npm run start
+```
 - If everything goes right, the terminal should report that it is listening on port 3000
 - In your browser, navigate to http://localhost:3000/example/ to test out the sample client
 
-### Alternate ways to run the app locally
+## Debugging
+- Start VS Code and open your cloned project's directory
+- In VS Code's menu, click on Run->Start Debugging (or F5)
+
+## Alternate ways to run the app locally
 -  Start the application from the terminal in development mode. This uses [nodemon](https://nodemon.io/) to restart the server in case you make changes. It also runs the linting script.
 ```bash
 # will look for definitions in the ./files/ directory and use http://localhost:8081 as the compute server address

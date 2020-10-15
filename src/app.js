@@ -37,6 +37,8 @@ app.use('/', require('./routes/index'))
 app.use('/definition', require('./routes/definition'))
 app.use('/solve', require('./routes/solve'))
 
+// ref: https://github.com/expressjs/express/issues/3589
+// remove line when express@^4.17
 express.static.mime.types["wasm"] = "application/wasm";
 
 // catch 404 and forward to error handler

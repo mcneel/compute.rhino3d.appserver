@@ -2,20 +2,19 @@
 
 import * as THREE from 'https://unpkg.com/three@0.121.1/build/three.module.js';
 import { OrbitControls } from 'https://unpkg.com/three@0.121.1/examples/jsm/controls/OrbitControls.js';
-// import rhino3dm from 'https://unpkg.com/rhino3dm@0.13.0/rhino3dm.js' // TODO
-import rhino3dm from './rhino3dm.js' // compiled with `-s EXPORT_ES6=1`
 
 ['count'].forEach(element => {
   document.getElementById(element).onmouseup = onSliderChange
   document.getElementById(element).ontouchend = onSliderChange
 });
 
+document.getElementById('explode').onclick = onSliderChange
+
 let data = {
   definition: 'dresser3.gh',
   inputs: {
     'num': document.getElementById('count').valueAsNumber,
-    // 'Radius':document.getElementById('radius').valueAsNumber,
-    // 'Length':document.getElementById('length').valueAsNumber
+    'explode': document.getElementById('explode').checked
   }
 }
 
@@ -52,15 +51,15 @@ async function compute() {
     // hide spinner
     document.getElementById('loader').style.display = 'none'
 
-    // get mesh (0: normal, 1: exploded)
-    let data = JSON.parse(responseJson.values[1].InnerTree['{ 0; }'][0].data)
-    // let mesh = rhino.DracoCompression.decompressBase64String(data)
+    // get mesh
+    let data = JSON.parse(responseJson.values[0].InnerTree['{ 0; }'][0].data)
     let mesh = rhino.CommonObject.decode(data)
+
+    mesh.scale(0.1)
 
     if (!_threeMaterial) {
       _threeMaterial = new THREE.MeshNormalMaterial()
     }
-    mesh.scale(0.02)
 
     let threeMesh = meshToThreejs(mesh, _threeMaterial)
     replaceCurrentMesh(threeMesh)
@@ -84,9 +83,8 @@ function onSliderChange () {
 
   // get slider values
   data.inputs = {
-    'num':document.getElementById('count').valueAsNumber,
-    // 'Radius':document.getElementById('radius').valueAsNumber,
-    // 'Length':document.getElementById('length').valueAsNumber
+    'num': document.getElementById('count').valueAsNumber,
+    'explode': document.getElementById('explode').checked
   }
   compute()
 }

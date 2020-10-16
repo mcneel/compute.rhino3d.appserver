@@ -7,13 +7,7 @@ data.inputs = {
   'Length':document.getElementById('length').valueAsNumber
 }
 
-// set this to the target appserver url
-let url = window.location.href
-url = url.substring(0, url.length - 1)
-url = url.substring(0, url.lastIndexOf('/')) + '/solve'
-
-let _threeMesh = null
-let _threeMaterial = null // just keep reusing the same material
+let _threeMesh, _threeMaterial, rhino
 
 rhino3dm().then(async m => {
   console.log('Loaded rhino3dm.')
@@ -40,22 +34,19 @@ async function compute(){
 
   let headers = null
 
-  await fetch(url, request).then( (response) => {
+  try {
+    const response = await fetch('/solve', request)
+
     if(!response.ok)
       throw new Error(response.statusText)
-    else {
-      headers = response.headers.get('server-timing')
-      return response.json()
-    }
-  }).then( (responseJson) => {
+      
+    headers = response.headers.get('server-timing')
+    const responseJson = await response.json()
 
     // Request finished. Do processing here.
     let t1 = performance.now()
     const computeSolveTime = t1 - timeComputeStart
     t0 = t1
-
-    //let responseJson = await response.json()
-    //let headers = response.headers.get('server-timing')
 
     // hide spinner
     document.getElementById('loader').style.display = 'none'
@@ -94,10 +85,9 @@ async function compute(){
     console.log(`  ${Math.round(decodeMeshTime)} ms: decode json to rhino3dm mesh`)
     console.log(`  ${Math.round(rebuildSceneTime)} ms: create threejs mesh and insert in scene`)
 
-  }).catch( (error) => {
+  } catch(error) {
     console.error(error)
-  })
-
+  }
   
 }
 

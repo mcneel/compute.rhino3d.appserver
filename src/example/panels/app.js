@@ -9,15 +9,7 @@ data.inputs = {
   'num_y':document.getElementById('y').valueAsNumber
 }
 
-// set this to the target appserver url
-let url = window.location.href
-url = url.substring(0, url.length - 1)
-url = url.substring(0, url.lastIndexOf('/'))
-url = url.substring(0, url.lastIndexOf('/')) + '/solve'
-console.log(url)
-
-let _threeMesh = null
-let _threeMaterial = null // just keep reusing the same material
+let _threeMesh, _threeMaterial, rhino
 
 rhino3dm().then(async m => {
   console.log('Loaded rhino3dm.')
@@ -40,13 +32,13 @@ async function compute(){
     'headers': {'Content-Type': 'application/json'}
   }
 
-  await fetch(url, request).then( (response) => {
+  try {
+    const response = await fetch('/solve', request)
+
     if(!response.ok)
       throw new Error(response.statusText)
-    else {
-      return response.json()
-    }
-  }).then( (responseJson) => {
+
+    const responseJson = await response.json()
 
     // Request finished. Do processing here.
 
@@ -100,14 +92,10 @@ async function compute(){
       div.style.height = '30px'
       div.style.backgroundColor = color_data[i]
       legend.appendChild(div)
-
     }
-    
-  }).catch( (error) => {
+  } catch(error){
     console.error(error)
-  })
-
-  
+  }
 }
 
 /**

@@ -21,6 +21,8 @@ This app is intended to host one or more custom grasshopper definitions and serv
 A workshop on using the appserver can be found at
 https://vimeo.com/442079095
 
+Slides available at https://docs.google.com/presentation/d/1nCbd87iA_D2ZCwoSirOYK3har6XUJHDUEIkt635btUU
+
 ## Example
 When we have our testing server up and running, you can visit
 

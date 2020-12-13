@@ -27,17 +27,6 @@ $ npm run start
 - In VS Code's menu, click on Run->Start Debugging (or F5)
 
 ## Alternate ways to run the app locally
--  Start the application from the terminal in development mode. This uses [nodemon](https://nodemon.io/) to restart the server in case you make changes. It also runs the linting script.
-```bash
-# will look for definitions in the ./files/ directory and use http://localhost:8081 as the compute server address
-
-$ npm run dev
-
-# alternatively, if you'd like to define a different address for the compute server (check the 'dev' script in packages.json):
-
-$ nodemon --inspect ./src/bin/www --computeUrl http://localhost:8081/  --exec \"npm run lint && node\""
-```
-
 - If you'd like to run this application locally without any of the development tools you can use the following:
 
 ```bash

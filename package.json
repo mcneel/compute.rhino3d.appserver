@@ -39,7 +39,6 @@
   },
   "scripts": {
     "start": "node ./src/bin/www",
-    "dev": "nodemon --inspect ./src/bin/www --exec \"npm run lint && node\"",
     "lint": "eslint src/*.js --fix && eslint src/routes/*.js --fix && eslint src/bin/www --fix",
     "start-args": "node ./src/bin/www --computeUrl http://localhost:8081/"
   },
@@ -59,7 +58,6 @@
     "throng": "4.0.0"
   },
   "devDependencies": {
-    "eslint": "7.5.0",
-    "nodemon": "2.0.4"
+    "eslint": "7.5.0"
   }
 }

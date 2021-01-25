@@ -48,9 +48,11 @@ router.get('/:name', computeParams, function(req, res, next){
       let inputs = result.Inputs === undefined ? result.InputNames : result.Inputs
       let outputs = result.Outputs === undefined ? result.OutputNames: result.Outputs
 
+      data.description = result.Description === undefined ? '' : result.Description
       data.inputs = inputs
       data.outputs = outputs
 
+      definition.description = data.description
       definition.inputs = inputs
       definition.outputs = outputs
 
@@ -59,6 +61,7 @@ router.get('/:name', computeParams, function(req, res, next){
       next(error)
     }) 
   } else {
+    data.description = definition.description
     data.inputs = definition.inputs
     data.outputs = definition.outputs
 

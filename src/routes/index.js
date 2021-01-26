@@ -1,29 +1,47 @@
+/**
+ * Provide routes for getting descriptive information about the definitions
+ * available on this AppServer instance as well as details on the inputs and
+ * outputs for a given definition
+ * 
+ * Routes:
+ *  ('/')
+ *     Show list of definitions available
+ *  ('/:definition')
+ *     Get definition input/output details for a definition installed in
+ *     this AppServer. These definitions are located in the 'files' directory
+ *  ('/definition_description?path=FILEPATH`)
+ *     Get definition input/output details for a definition at an absolute
+ *     path on the AppServer machine.
+ */
 const express = require('express')
 const router = express.Router()
 const compute = require('compute-rhino3d')
+const md5File = require('md5-file')
 
-function computeParams (req, res, next){
+/**
+ * Set url and apikey used to communicate with a compute server
+ */
+function setComputeParams (){
   compute.url = process.env.RHINO_COMPUTE_URL
   compute.apiKey = process.env.RHINO_COMPUTE_KEY
-  next()
 }
 
-// Return information related to the definitions on the server
+/**
+ * Return list of definitions available on this server. The definitions
+ * are located in the 'files' directory. These are the names that can be
+ * used to call '/:definition_name` for details about a specific definition
+ */
 router.get('/',  function(req, res, next) {
   let definitions = []
   req.app.get('definitions').forEach( def => {
-    let data = {name: def.name, inputs: def.inputs, outputs: def.outputs}
-    definitions.push(data)
+    definitions.push({name: def.name})
   })
 
   res.setHeader('Content-Type', 'application/json')
   res.send(JSON.stringify(definitions))
 })
 
-// Return information related to a specific definition
-router.get('/:name', computeParams, function(req, res, next){
-  let definition = req.app.get('definitions').find(o => o.name === req.params.name)
-
+function describeDefinition(definition, req, res, next){
   if(definition === undefined)
     throw new Error('Definition not found on server.') 
 
@@ -34,6 +52,7 @@ router.get('/:name', computeParams, function(req, res, next){
     let fullUrl = req.protocol + '://' + req.get('host')
     let definitionPath = `${fullUrl}/definition/${definition.id}`
     
+    setComputeParams()
     compute.computeFetch('io', {'pointer':definitionPath}, false).then( (response) => {
 
       // Throw error if response not ok
@@ -68,6 +87,31 @@ router.get('/:name', computeParams, function(req, res, next){
     res.setHeader('Content-Type', 'application/json')
     res.send(JSON.stringify(data))
   }
+}
+
+router.get('/definition_description', function(req, res, next){
+  let fullPath = req.query['path']
+  let definition = req.app.get('definitions').find(o => o.name === fullPath)
+  if(definition === undefined){
+    const hash = md5File.sync(fullPath)
+    let definitions = req.app.get('definitions')
+    definition = {
+      name: fullPath,
+      id:hash,
+      path: fullPath
+    }
+    definitions.push(definition)
+  }
+  describeDefinition(definition, req, res, next)
+})
+
+/**
+ * This route needs to be declared after /definition_description so it won't be
+ * called when '/definition_description' is requested
+ */
+router.get('/:name', function(req, res, next){
+  let definition = req.app.get('definitions').find(o => o.name === req.params.name)
+  describeDefinition(definition, req, res, next)
 })
 
 module.exports = router

@@ -33,6 +33,7 @@ console.log('RHINO_COMPUTE_URL: ' + process.env.RHINO_COMPUTE_URL)
 
 // Routes for this app
 app.use('/example', express.static(__dirname + '/example'))
+app.get('/favicon.ico', (req, res) => res.status(200))
 app.use('/', require('./routes/index'))
 app.use('/definition', require('./routes/definition'))
 app.use('/solve', require('./routes/solve'))

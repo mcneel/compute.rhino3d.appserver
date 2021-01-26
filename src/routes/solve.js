@@ -48,7 +48,10 @@ function collectParams (req, res, next){
     break
   }
 
-  definition = req.app.get('definitions').find(o => o.name === res.locals.params.definition)
+  let definitionName = res.locals.params.definition
+  if (definitionName===undefined)
+    definitionName = res.locals.params.pointer
+  definition = req.app.get('definitions').find(o => o.name === definitionName)
   if(!definition)
     throw new Error('Definition not found on server.')
 
@@ -69,6 +72,8 @@ function checkCache (req, res, next){
   const key = {}
   key.definition = { 'name': res.locals.params.definition.name, 'id': res.locals.params.definition.id }
   key.inputs = res.locals.params.inputs
+  if (res.locals.params.values!==undefined)
+    key.inputs = res.locals.params.values
   res.locals.cacheKey = JSON.stringify(key)
   res.locals.cacheResult = null
 
@@ -123,6 +128,13 @@ function commonSolve (req, res, next){
       for (let [key, value] of Object.entries(res.locals.params.inputs)) {
         let param = new compute.Grasshopper.DataTree('RH_IN:'+key)
         param.append([0], [value])
+        trees.push(param)
+      }
+    }
+    if(res.locals.params.values !== undefined) {
+      for (let index=0; index<res.locals.params.values.length; index++) {
+        let param = new compute.Grasshopper.DataTree('')
+        param.data = res.locals.params.values[index]
         trees.push(param)
       }
     }

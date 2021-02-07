@@ -57,9 +57,13 @@ app.use(function(err, req, res, next) {
   res.locals.message = err.message
   console.log(err.message)
   res.locals.error = req.app.get('env') === 'development' ? err : {}
+  data = { message: err.message }
+  if (req.app.get('env') === 'development')
+  {
+    data.stack = err.stack
+  }
   // send the error
-  res.status(err.status || 500)
-  res.send(err.message)
+  res.status(err.status || 500).send(data)
 })
 
 module.exports = app

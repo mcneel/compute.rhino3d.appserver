@@ -12,7 +12,10 @@
                 "<node_internals>/**"
             ],
             "autoAttachChildProcesses": true,
-            "program": "${workspaceFolder}/src/bin/www"
+            "program": "${workspaceFolder}/src/bin/www",
+            "env": {
+                "NODE_ENV": "development"
+            }
         }
     ]
 }

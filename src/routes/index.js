@@ -60,7 +60,9 @@ function describeDefinition(definition, req, res, next){
       definition.inputs = data.inputs
       definition.outputs = data.outputs
 
-      res.json(data)
+      // pretty print json
+      res.setHeader('Content-Type', 'application/json')
+      res.send(JSON.stringify(data, null, 4))
     }).catch(next)
   } else {
     data.description = definition.description
@@ -68,7 +70,7 @@ function describeDefinition(definition, req, res, next){
     data.outputs = definition.outputs
 
     res.setHeader('Content-Type', 'application/json')
-    res.send(JSON.stringify(data))
+    res.send(JSON.stringify(data, null, 4))
   }
 }
 

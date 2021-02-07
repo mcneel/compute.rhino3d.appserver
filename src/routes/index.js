@@ -17,6 +17,7 @@ const express = require('express')
 const router = express.Router()
 const compute = require('compute-rhino3d')
 const md5File = require('md5-file')
+const getParams = require('../definitions.js').getParams
 
 /**
  * Set url and apikey used to communicate with a compute server
@@ -47,38 +48,20 @@ function describeDefinition(definition, req, res, next){
 
   let data = {name: definition.name}
 
-  if(!Object.prototype.hasOwnProperty.call(definition, 'inputs') && !Object.prototype.hasOwnProperty.call(definition, 'outputs')){
+  if(!Object.prototype.hasOwnProperty.call(definition, 'inputs')
+     && !Object.prototype.hasOwnProperty.call(definition, 'outputs')) {
 
     let fullUrl = req.protocol + '://' + req.get('host')
     let definitionPath = `${fullUrl}/definition/${definition.id}`
-    
-    setComputeParams()
-    compute.computeFetch('io', {'pointer':definitionPath}, false).then( (response) => {
 
-      // Throw error if response not ok
-      if(!response.ok) {
-        throw new Error(response.statusText)
-      } else {
-        return response.json()
-      }
-
-    }).then( (result) => {
-
-      let inputs = result.Inputs === undefined ? result.InputNames : result.Inputs
-      let outputs = result.Outputs === undefined ? result.OutputNames: result.Outputs
-
-      data.description = result.Description === undefined ? '' : result.Description
-      data.inputs = inputs
-      data.outputs = outputs
-
+    getParams(definitionPath).then(data => {
+      // cache
       definition.description = data.description
-      definition.inputs = inputs
-      definition.outputs = outputs
+      definition.inputs = data.inputs
+      definition.outputs = data.outputs
 
       res.json(data)
-    }).catch( (error) => {
-      next(error)
-    }) 
+    }).catch(next)
   } else {
     data.description = definition.description
     data.inputs = definition.inputs

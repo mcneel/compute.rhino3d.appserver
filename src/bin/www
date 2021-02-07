@@ -104,6 +104,10 @@ function start(id){
       : 'port ' + addr.port
     debug('Listening on ' + bind)
     console.log('Listening on ' + bind)
-    // console.log('Server address: '+ addr.address)
+
+    // print handy /view url
+    if (typeof addr !== 'string') {
+      console.log(`Go to viewer: http://localhost:${addr.port}/view`)
+    }
   }
 }

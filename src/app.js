@@ -31,12 +31,16 @@ if (!process.env.RHINO_COMPUTE_URL)
 
 console.log('RHINO_COMPUTE_URL: ' + process.env.RHINO_COMPUTE_URL)
 
+app.set('view engine', 'hbs');
+app.set('views', './src/views')
+
 // Routes for this app
 app.use('/example', express.static(__dirname + '/example'))
 app.get('/favicon.ico', (req, res) => res.status(200))
-app.use('/', require('./routes/index'))
 app.use('/definition', require('./routes/definition'))
 app.use('/solve', require('./routes/solve'))
+app.use('/view', require('./routes/template'))
+app.use('/', require('./routes/index'))
 
 // ref: https://github.com/expressjs/express/issues/3589
 // remove line when express@^4.17
@@ -51,11 +55,15 @@ app.use(function(req, res, next) {
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message
-  console.log(err.message)
+  console.error(err)
   res.locals.error = req.app.get('env') === 'development' ? err : {}
+  data = { message: err.message }
+  if (req.app.get('env') === 'development')
+  {
+    data.stack = err.stack
+  }
   // send the error
-  res.status(err.status || 500)
-  res.send(err.message)
+  res.status(err.status || 500).send(data)
 })
 
 module.exports = app

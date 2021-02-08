@@ -1,9 +1,10 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124.0/build/three.module.js'
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/controls/OrbitControls.js'
-import { Rhino3dmLoader } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/loaders/3DMLoader.js'
 import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/rhino3dm.module.js'
 
 /* eslint no-undef: "off", no-unused-vars: "off" */
+
+const definition = 'BranchNodeRnd.gh'
 
 // setup input change events
 const count_slider = document.getElementById( 'count' )
@@ -16,13 +17,8 @@ const length_slider = document.getElementById( 'length' )
 length_slider.addEventListener( 'mouseup', onSliderChange, false )
 length_slider.addEventListener( 'touchend', onSliderChange, false )
 
-// set up loader for converting the results to threejs
-const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
-
-// create a few variables to store a reference to the rhino3dm library and to the loaded definition
-let rhino, definition, doc
-
+// load the rhino3dm library
+let rhino
 rhino3dm().then(async m => {
   console.log('Loaded rhino3dm.')
   rhino = m // global
@@ -31,8 +27,7 @@ rhino3dm().then(async m => {
   compute()
 })
 
-let data = {}
-data.definition = 'BranchNodeRnd.gh'
+
 
 let _threeMesh, _threeMaterial
 
@@ -43,10 +38,13 @@ async function compute(){
   let t0 = performance.now()
   const timeComputeStart = t0
 
+  // collect data from inputs
+  let data = {}
+  data.definition = definition  
   data.inputs = {
-    'Count':document.getElementById('count').valueAsNumber,
-    'Radius':document.getElementById('radius').valueAsNumber,
-    'Length':document.getElementById('length').valueAsNumber
+    'Count': count_slider.valueAsNumber,
+    'Radius': radius_slider.valueAsNumber,
+    'Length': length_slider.valueAsNumber
   }
 
   console.log(data.inputs)

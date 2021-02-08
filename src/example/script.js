@@ -1,13 +1,27 @@
-/* eslint no-undef: "off", no-unused-vars: "off" */
-let data = {}
-data.definition = 'BranchNodeRnd.gh'
-data.inputs = {
-  'Count':document.getElementById('count').valueAsNumber,
-  'Radius':document.getElementById('radius').valueAsNumber,
-  'Length':document.getElementById('length').valueAsNumber
-}
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124.0/build/three.module.js'
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/controls/OrbitControls.js'
+import { Rhino3dmLoader } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/loaders/3DMLoader.js'
+import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/rhino3dm.module.js'
 
-let _threeMesh, _threeMaterial, rhino
+/* eslint no-undef: "off", no-unused-vars: "off" */
+
+// setup input change events
+const count_slider = document.getElementById( 'count' )
+count_slider.addEventListener( 'mouseup', onSliderChange, false )
+count_slider.addEventListener( 'touchend', onSliderChange, false )
+const radius_slider = document.getElementById( 'radius' )
+radius_slider.addEventListener( 'mouseup', onSliderChange, false )
+radius_slider.addEventListener( 'touchend', onSliderChange, false )
+const length_slider = document.getElementById( 'length' )
+length_slider.addEventListener( 'mouseup', onSliderChange, false )
+length_slider.addEventListener( 'touchend', onSliderChange, false )
+
+// set up loader for converting the results to threejs
+const loader = new Rhino3dmLoader()
+loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
+
+// create a few variables to store a reference to the rhino3dm library and to the loaded definition
+let rhino, definition, doc
 
 rhino3dm().then(async m => {
   console.log('Loaded rhino3dm.')
@@ -17,12 +31,23 @@ rhino3dm().then(async m => {
   compute()
 })
 
+let data = {}
+data.definition = 'BranchNodeRnd.gh'
+
+let _threeMesh, _threeMaterial
+
 /**
  * Call appserver
  */
 async function compute(){
   let t0 = performance.now()
   const timeComputeStart = t0
+
+  data.inputs = {
+    'Count':document.getElementById('count').valueAsNumber,
+    'Radius':document.getElementById('radius').valueAsNumber,
+    'Length':document.getElementById('length').valueAsNumber
+  }
 
   console.log(data.inputs)
 
@@ -98,13 +123,6 @@ async function compute(){
 function onSliderChange () {
   // show spinner
   document.getElementById('loader').style.display = 'block'
-
-  // get slider values
-  data.inputs = {
-    'Count':document.getElementById('count').valueAsNumber,
-    'Radius':document.getElementById('radius').valueAsNumber,
-    'Length':document.getElementById('length').valueAsNumber
-  }
   compute()
 }
 
@@ -123,7 +141,7 @@ function init () {
   let canvas = document.getElementById('canvas')
   canvas.appendChild( renderer.domElement )
 
-  controls = new THREE.OrbitControls( camera, renderer.domElement  )
+  controls = new OrbitControls( camera, renderer.domElement  )
 
   camera.position.z = 50
 

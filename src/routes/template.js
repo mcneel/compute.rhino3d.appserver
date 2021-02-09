@@ -35,12 +35,13 @@ router.get('/:name', async (req, res, next) => {
     return
   }
 
-  const baseurl = req.protocol + '://' + req.get('host')
+  const fullUrl = req.protocol + '://' + req.get('host')
+  let definitionPath = `${fullUrl}/definition/${definition.id}`
 
   // TODO: cache params! (see index.js:describeDefinition())
   let data
   try {
-    data = await getParams(definition.path)
+    data = await getParams(definitionPath)
   } catch (err) {
     res.status(500).json({ message: 'Error from Compute: ' + err.message })
     return

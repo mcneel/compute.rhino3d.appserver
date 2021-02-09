@@ -169,11 +169,11 @@ function collectResults(responseJson) {
         const branch = values[i].InnerTree[path]
         // ...and for each branch...
         for( let j = 0; j < branch.length; j ++) {
-            const rhinoObject = decodeItem(branch[j])
-            //if (rhinoObject !== undefined && rhinoObject !== null) {
-            if (rhinoObject !== null) {
-              doc.objects().add(rhinoObject, null)
-            }
+          // ...load rhino geometry into doc
+          const rhinoObject = decodeItem(branch[j])
+          if (rhinoObject !== null) {
+            doc.objects().add(rhinoObject, null)
+          }
         }
       }
     }
@@ -184,9 +184,8 @@ function collectResults(responseJson) {
       return
     }
 
+    // load rhino doc into three.js scene
     const buffer = new Uint8Array(doc.toByteArray()).buffer
-
-    // load
     loader.parse( buffer, function ( object ) 
     {
         // debug 

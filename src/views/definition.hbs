@@ -67,12 +67,10 @@ import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/rhino3dm
 const loader = new Rhino3dmLoader()
 loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
 
-const downloadButton = document.getElementById("downloadButton")
-downloadButton.onclick = download
-
+// initialise 'data' object that will be used by compute()
 const data = {
   definition: '{{name}}',
-  inputs: setupInputs()
+  inputs: getInputs()
 }
 
 // globals
@@ -85,13 +83,18 @@ rhino3dm().then(async m => {
     compute()
 })
 
-
+const downloadButton = document.getElementById("downloadButton")
+downloadButton.onclick = download
 
   /////////////////////////////////////////////////////////////////////////////
  //                            HELPER  FUNCTIONS                            //
 /////////////////////////////////////////////////////////////////////////////
 
-function setupInputs() {
+/**
+ * Gets <input> elements from html and sets handlers
+ * (html is generated from the grasshopper definition)
+ */
+function getInputs() {
   const inputs = {}
   for (const input of document.getElementsByTagName('input')) {
     switch (input.type) {
@@ -113,6 +116,47 @@ function setupInputs() {
     }
   }
   return inputs
+}
+
+// more globals
+let scene, camera, renderer, controls
+
+/**
+ * Sets up the scene, camera, renderer, lights and controls and starts the animation
+ */
+function init() {
+
+    // Rhino models are z-up, so set this as the default
+    THREE.Object3D.DefaultUp = new THREE.Vector3( 0, 0, 1 );
+
+    // create a scene and a camera
+    scene = new THREE.Scene()
+    scene.background = new THREE.Color(1, 1, 1)
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
+    camera.position.set(1, -1, 1) // like perspective view
+
+    scene.background = new THREE.Color('lightgray')
+
+    // create the renderer and add it to the html
+    renderer = new THREE.WebGLRenderer({ antialias: true })
+    renderer.setSize(window.innerWidth, window.innerHeight)
+    document.body.appendChild(renderer.domElement)
+
+    // add some controls to orbit the camera
+    controls = new OrbitControls(camera, renderer.domElement)
+
+    // add a directional light
+    const directionalLight = new THREE.DirectionalLight( 0xffffff )
+    directionalLight.intensity = 2
+    scene.add( directionalLight )
+
+    const ambientLight = new THREE.AmbientLight()
+    scene.add( ambientLight )
+
+    // handle changes in the window size
+    window.addEventListener( 'resize', onWindowResize, false )
+
+    animate()
 }
 
 /**
@@ -249,47 +293,6 @@ function onSliderChange () {
   data.inputs = inputs
 
   compute()
-}
-
-// globals
-let scene, camera, renderer, controls
-
-/**
- * Sets up the scene, camera, renderer, lights and controls and starts the animation
- */
-function init() {
-
-    // Rhino models are z-up, so set this as the default
-    THREE.Object3D.DefaultUp = new THREE.Vector3( 0, 0, 1 );
-
-    // create a scene and a camera
-    scene = new THREE.Scene()
-    scene.background = new THREE.Color(1, 1, 1)
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
-    camera.position.set(1, -1, 1) // like perspective view
-
-    scene.background = new THREE.Color('lightgray')
-
-    // create the renderer and add it to the html
-    renderer = new THREE.WebGLRenderer({ antialias: true })
-    renderer.setSize(window.innerWidth, window.innerHeight)
-    document.body.appendChild(renderer.domElement)
-
-    // add some controls to orbit the camera
-    controls = new OrbitControls(camera, renderer.domElement)
-
-    // add a directional light
-    const directionalLight = new THREE.DirectionalLight( 0xffffff )
-    directionalLight.intensity = 2
-    scene.add( directionalLight )
-
-    const ambientLight = new THREE.AmbientLight()
-    scene.add( ambientLight )
-
-    // handle changes in the window size
-    window.addEventListener( 'resize', onWindowResize, false )
-
-    animate()
 }
 
 /**

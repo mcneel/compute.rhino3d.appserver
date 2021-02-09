@@ -253,6 +253,8 @@ function init() {
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000)
     camera.position.set(1, -1, 1) // like perspective view
 
+    scene.background = new THREE.Color('lightgray')
+
     // create the renderer and add it to the html
     renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setSize(window.innerWidth, window.innerHeight)

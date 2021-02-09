@@ -162,26 +162,21 @@ function collectResults(responseJson) {
     //console.log(values)
     doc = new rhino.File3dm()
 
+    // for each output (RH_OUT:*)...
     for ( let i = 0; i < values.length; i ++ ) {
-        const list = values[i].InnerTree['{ 0; }']
-        for( let j = 0; j < list.length; j ++) {
-            const item = values[i].InnerTree['{ 0; }'][j]
-            const data = JSON.parse(item.data)
-            let rhinoObject
-            if (item.type === 'System.String') {
-                // hack for draco meshes
-                try {
-                    rhinoObject = rhino.DracoCompression.decompressBase64String(data)
-                } catch {} // ignore
-            } else if (typeof data === 'object') {
-                rhinoObject = rhino.CommonObject.decode(data)
-            } else {
-              continue
-            }
-            if (rhinoObject !== undefined && rhinoObject !== null) {
+      // ...iterate through data tree structure...
+      for (const path in values[i].InnerTree) {
+        const branch = values[i].InnerTree[path]
+        // ...and for each branch...
+        for( let j = 0; j < branch.length; j ++) {
+            const rhinoObject = decodeItem(branch[j])
+            //if (rhinoObject !== undefined && rhinoObject !== null) {
+            if (rhinoObject !== null) {
               doc.objects().add(rhinoObject, null)
             }
         }
+      }
+    }
     }
 
     const buffer = new Uint8Array(doc.toByteArray()).buffer
@@ -207,6 +202,22 @@ function collectResults(responseJson) {
         // zoom to extents
         zoomCameraToSelection(camera, controls, scene.children)
     })
+}
+
+/**
+ * Attempt to decode data tree item to rhino geometry
+ */
+function decodeItem(item) {
+  const data = JSON.parse(item.data)
+  if (item.type === 'System.String') {
+    // hack for draco meshes
+    try {
+        return rhino.DracoCompression.decompressBase64String(data)
+    } catch {} // ignore errors (maybe the string was just a string...)
+  } else if (typeof data === 'object') {
+    return rhino.CommonObject.decode(data)
+  }
+  return null
 }
 
 /**

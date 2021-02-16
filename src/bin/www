@@ -2,6 +2,11 @@
 
 const definitions = require('../definitions.js').registerDefinitions()
 const throng = require('throng')
+const CacheManager = require('../cacheManager')
+
+// const NodeCache = require('node-cache')
+//const cache = new NodeCache()
+const cache = new CacheManager()
 
 const WORKERS = process.env.WEB_CONCURRENCY || 1
 
@@ -20,6 +25,7 @@ function start(id){
 
   var app = require('../app')
   app.set('definitions', definitions)
+  app.set('cache', cache)
   var debug = require('debug')('compute.appserver:server')
 
   var http = require('http')

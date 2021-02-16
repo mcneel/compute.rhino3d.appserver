@@ -3,8 +3,8 @@ const router = express.Router()
 const compute = require('compute-rhino3d')
 const {performance} = require('perf_hooks')
 
-const NodeCache = require('node-cache')
-const cache = new NodeCache()
+//const NodeCache = require('node-cache')
+//const cache = new NodeCache()
 
 const memjs = require('memjs')
 let mc = null
@@ -80,7 +80,8 @@ function checkCache (req, res, next){
   if(mc === null){
     // use node cache
     //console.log('using node-cache')
-    const result = cache.get(res.locals.cacheKey)
+    //const result = cache.get(res.locals.cacheKey)
+    const result = req.app.get('cache').get(res.locals.cacheKey)
     res.locals.cacheResult = result !== undefined ? result : null
     next()
   } else {
@@ -178,7 +179,8 @@ function commonSolve (req, res, next){
         })
       } else {
         //set node-cache
-        cache.set(res.locals.cacheKey, result)
+        //cache.set(res.locals.cacheKey, result)
+        req.app.get('cache').set(res.locals.cacheKey, result)
       }
 
       res.setHeader('Server-Timing', timing)

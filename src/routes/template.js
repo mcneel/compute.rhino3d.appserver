@@ -38,13 +38,21 @@ router.get('/:name', async (req, res, next) => {
   const fullUrl = req.protocol + '://' + req.get('host')
   let definitionPath = `${fullUrl}/definition/${definition.id}`
 
-  // TODO: cache params! (see index.js:describeDefinition())
-  let data
-  try {
-    data = await getParams(definitionPath)
-  } catch (err) {
-    res.status(500).json({ message: 'Error from Compute: ' + err.message })
-    return
+  if(!Object.prototype.hasOwnProperty.call(definition, 'inputs')
+     && !Object.prototype.hasOwnProperty.call(definition, 'outputs')) {
+
+    let data
+    try {
+      data = await getParams(definitionPath)
+    } catch (err) {
+      next(err)
+    }
+
+    // cache
+    definition.description = data.description
+    definition.inputs = data.inputs
+    definition.outputs = data.outputs
+
   }
 
   view = {
@@ -52,7 +60,7 @@ router.get('/:name', async (req, res, next) => {
     inputs: []
   }
 
-  for (const input of data.inputs) {
+  for (const input of definition.inputs) {
     const name = input.name.replace(/^RH_IN:/, '')
     const id = name
     switch (input.paramType) {

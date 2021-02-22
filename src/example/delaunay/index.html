@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <!-- <link rel="icon" href="data:,"> -->
-        <title>DMesh.ghx</title>
+        <title>Delaunay triangulation</title>
         <style>
             body {
                 margin: 0;
@@ -68,9 +68,9 @@ loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
 
 // initialise 'data' object that will be used by compute()
 const data = {
-  definition: 'DMesh.ghx',
+  definition: 'delaunay.gh',
   inputs: {
-    '102:Points': []
+    'points': [] // start with an empty list (corresponds to "RH_IN:points" input)
   }
 }
 
@@ -81,7 +81,7 @@ rhino3dm().then(async m => {
     rhino = m
 
     init()
-    // compute()
+    // compute() // don't compute until user clicks - see onClick()
 })
 
 const downloadButton = document.getElementById("downloadButton")
@@ -103,13 +103,21 @@ let scene, camera, renderer, controls
 function init() {
 
     // Rhino models are z-up, so set this as the default
-    // THREE.Object3D.DefaultUp = new THREE.Vector3( 0, 0, 1 );
+    THREE.Object3D.DefaultUp = new THREE.Vector3( 0, 0, 1 );
 
     // create a scene and a camera
     scene = new THREE.Scene()
     scene.background = new THREE.Color(1, 1, 1)
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
-    camera.position.set(0, 0, 1000);
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    // top view
+    // near/far set up to draw on z=0 plane
+    const frustumSize = 1000
+    const aspect = window.innerWidth / window.innerHeight;
+		camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, -1, 1 );
+
+    ///////////////////////////////////////////////////////////////////////////
 
     // very light grey for background, like rhino
     scene.background = new THREE.Color('black')
@@ -181,13 +189,6 @@ function collectResults(responseJson) {
         doc.delete()
     } catch {}
 
-    // clear objects from scene
-    scene.traverse(child => {
-        if (!child.isLight) {
-            scene.remove(child)
-        }
-    })
-
     //console.log(values)
     doc = new rhino.File3dm()
 
@@ -215,18 +216,29 @@ function collectResults(responseJson) {
     }
 
     // hack (https://github.com/mcneel/rhino3dm/issues/353)
-    doc.objects().addSphere(new rhino.Sphere([0,0,0], 1), null)
+    doc.objects().addSphere(new rhino.Sphere([0,0,0], 0.001), null)
 
     // load rhino doc into three.js scene
     const buffer = new Uint8Array(doc.toByteArray()).buffer
     loader.parse( buffer, function ( object ) 
     {
-        // debug 
+        // clear objects from scene
+        scene.traverse(child => {
+          if (!child.isLight) {
+            scene.remove(child)
+          }
+        })
+
+        ///////////////////////////////////////////////////////////////////////
+        
+        // render wireframe mesh
         object.traverse(child => {
           if (child.isMesh) {
             child.material = new THREE.MeshBasicMaterial({ wireframe: true, color: 'white' })
           }
         }, false)
+
+        ///////////////////////////////////////////////////////////////////////
 
         // add object graph from rhino model to three.js scene
         scene.add( object )
@@ -256,6 +268,9 @@ function decodeItem(item) {
   return null
 }
 
+/**
+ * Handle click events
+ */
 function onClick( event ) {
 
   // calculate mouse position in normalized device coordinates
@@ -265,19 +280,21 @@ function onClick( event ) {
   mouse.z = 0
   mouse.unproject(camera)
 
-  console.log( `${mouse.x},${mouse.y}` )
+  console.log( `${mouse.x},${mouse.y},${mouse.z}` )
 
   // add json-encoded Point3d to list
+  // e.g. '{ "X": 1.0, "Y": 2.0, "Z": 0.0 }'
   const pt = "{\"X\":"+mouse.x+",\"Y\":"+mouse.y+",\"Z\":"+mouse.z+"}"
-  data.inputs['102:Points'].push(pt)
+  // in delaunay.gh the input is "RH_IN:points"
+  data.inputs['points'].push(pt)
 
   // don't bother solving until we have three points
-  if (data.inputs['102:Points'].length < 3) {
+  if (data.inputs['points'].length < 3) {
     console.log("Need at least three points!")
     return
   }
 
-
+  // solve and update the geometry!
   compute()
 
 }

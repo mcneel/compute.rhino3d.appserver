@@ -197,13 +197,6 @@ function collectResults(responseJson) {
     if( doc !== undefined)
         doc.delete()
 
-    // clear objects from scene
-    scene.traverse(child => {
-        if (!child.isLight) {
-            scene.remove(child)
-        }
-    })
-
     //console.log(values)
     doc = new rhino.File3dm()
 
@@ -240,6 +233,13 @@ function collectResults(responseJson) {
             child.material = new THREE.MeshNormalMaterial()
         }, false)
         */
+
+        // clear objects from scene. do this here to avoid blink
+        scene.traverse(child => {
+            if (!child.isLight) {
+                scene.remove(child)
+            }
+        })
 
         // add object graph from rhino model to three.js scene
         scene.add( object )

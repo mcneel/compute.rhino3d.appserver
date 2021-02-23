@@ -90,7 +90,8 @@ async function compute(){
     t1 = performance.now()
     const rebuildSceneTime = t1 - t0
 
-    console.log(`[call compute and rebuild scene] = ${Math.round(t1-timeComputeStart)} ms`)
+    console.group(`[call compute and rebuild scene] = ${Math.round(t1-timeComputeStart)} ms`)
+    //console.log(`[call compute and rebuild scene] = ${Math.round(t1-timeComputeStart)} ms`)
     console.log(`  ${Math.round(computeSolveTime)} ms: appserver request`)
     let timings = headers.split(',')
     let sum = 0
@@ -107,6 +108,7 @@ async function compute(){
     console.log(`  .. ${Math.round(computeSolveTime - sum)} ms: local<->appserver network latency`)
     console.log(`  ${Math.round(decodeMeshTime)} ms: decode json to rhino3dm mesh`)
     console.log(`  ${Math.round(rebuildSceneTime)} ms: create threejs mesh and insert in scene`)
+    console.groupEnd()
 
   } catch(error) {
     console.error(error)

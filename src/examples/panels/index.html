@@ -5,15 +5,14 @@
         <link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png">
         <link rel="manifest" href="../favicon/site.webmanifest">
-        <title>Compute RestHopper Test: Panels</title>
+        <title>Panels</title>
         <style>
             body { margin: 0; }
             canvas { width: 100%; height: 100%; }
-            input {width: 90%;}
+            input {width: 30%;}
             #container {position: relative;}
             #container canvas, #overlay { position: absolute;}
-            #overlay {z-index: 1; width: 100%}
-
+            #overlay {z-index: 1; width: 40%}
             #loader {
                 border: 5px solid #f3f3f3; /* Light grey */
                 border-top: 5px solid #3d3d3d; /* Grey */
@@ -38,33 +37,27 @@
         <div id="container">
             <div id="overlay">
                 <div>
-                    <input type="range" id="clusters" name="clusters" min="2" max="10" value="5" step="1" onmouseup="onSliderChange()" ontouchend="onSliderChange()">
+                    <input type="range" id="clusters" name="clusters" min="2" max="10" value="5" step="1">
                     <label for="clusters">Clusters</label>
                 </div>
                 <div>
-                    <input type="range" id="dimension" name="dimension" min="5" max="100" value="20" step="1" onmouseup="onSliderChange()" ontouchend="onSliderChange()">
+                    <input type="range" id="dimension" name="dimension" min="5" max="100" value="20" step="1">
                     <label for="dimension">Dimension</label>
                 </div>
                 <div>
-                    <input type="range" id="resolution" name="resolution" min="5" max="30" value="20" step="1" onmouseup="onSliderChange()" ontouchend="onSliderChange()">
+                    <input type="range" id="resolution" name="resolution" min="5" max="30" value="20" step="1">
                     <label for="resolution">Resolution</label>
                 </div>
                 <div>
-                    <input type="range" id="x" name="x" min="0.0" max="1.0" value="0.5" step="0.1" onmouseup="onSliderChange()" ontouchend="onSliderChange()">
+                    <input type="range" id="x" name="x" min="0.0" max="1.0" value="0.5" step="0.1">
                     <label for="x">X Position</label>
                 </div>
                 <div>
-                    <input type="range" id="y" name="y" min="0.0" max="1.0" value="0.5" step="0.1" onmouseup="onSliderChange()" ontouchend="onSliderChange()">
+                    <input type="range" id="y" name="y" min="0.0" max="1.0" value="0.5" step="0.1">
                     <label for="y">Y Position</label>
                 </div>
             </div>
-
-            <div id="canvas"></div>
         </div>
-
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/three@0.120.1/build/three.min.js"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/three@0.120.1/examples/js/controls/OrbitControls.min.js"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/rhino3dm@0.13.0/rhino3dm.min.js"></script>
-        <script type="text/javascript" src="app.js"></script>
+        <script type="module" src="script.js"></script>
     </body>
 </html>

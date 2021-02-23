@@ -129,6 +129,9 @@ function onSliderChange () {
 var scene, camera, renderer, controls
 
 function init () {
+  // Rhino models are z-up, so set this as the default
+  THREE.Object3D.DefaultUp = new THREE.Vector3( 0, 0, 1 );
+
   scene = new THREE.Scene()
   scene.background = new THREE.Color(1,1,1)
   camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 )
@@ -136,8 +139,7 @@ function init () {
   renderer = new THREE.WebGLRenderer({antialias: true})
   renderer.setPixelRatio( window.devicePixelRatio )
   renderer.setSize( window.innerWidth, window.innerHeight )
-  let canvas = document.getElementById('canvas')
-  canvas.appendChild( renderer.domElement )
+  document.body.appendChild(renderer.domElement)
 
   controls = new OrbitControls( camera, renderer.domElement  )
 

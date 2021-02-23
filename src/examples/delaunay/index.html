@@ -2,7 +2,10 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <!-- <link rel="icon" href="data:,"> -->
+        <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png">
+        <link rel="manifest" href="../favicon/site.webmanifest">
         <title>Delaunay triangulation</title>
         <style>
             body {
@@ -60,7 +63,6 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124.0/build/three.m
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/controls/OrbitControls.js'
 import { Rhino3dmLoader } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/loaders/3DMLoader.js'
 import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/rhino3dm.module.js'
-import { RhinoCompute } from 'https://cdn.jsdelivr.net/npm/compute-rhino3d@0.13.0-beta/compute.rhino3d.module.js'
 
 // set up loader for converting the results to threejs
 const loader = new Rhino3dmLoader()

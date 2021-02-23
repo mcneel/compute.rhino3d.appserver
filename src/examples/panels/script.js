@@ -1,13 +1,26 @@
 /* eslint no-undef: "off", no-unused-vars: "off" */
-let data = {}
-data.definition = 'srf_kmeans.gh'
-data.inputs = {
-  'int_k':document.getElementById('clusters').valueAsNumber,
-  'int_dimension':document.getElementById('dimension').valueAsNumber,
-  'int_resolution':document.getElementById('resolution').valueAsNumber,
-  'num_x':document.getElementById('x').valueAsNumber,
-  'num_y':document.getElementById('y').valueAsNumber
-}
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124.0/build/three.module.js'
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/controls/OrbitControls.js'
+import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/rhino3dm.module.js'
+
+const definition = 'srf_kmeans.gh'
+
+// setup input change events
+const clusters_slider = document.getElementById( 'clusters' )
+clusters_slider.addEventListener( 'mouseup', onSliderChange, false )
+clusters_slider.addEventListener( 'touchend', onSliderChange, false )
+const dimension_slider = document.getElementById( 'dimension' )
+dimension_slider.addEventListener( 'mouseup', onSliderChange, false )
+dimension_slider.addEventListener( 'touchend', onSliderChange, false )
+const resolution_slider = document.getElementById( 'resolution' )
+resolution_slider.addEventListener( 'mouseup', onSliderChange, false )
+resolution_slider.addEventListener( 'touchend', onSliderChange, false )
+const x_slider = document.getElementById( 'x' )
+x_slider.addEventListener( 'mouseup', onSliderChange, false )
+x_slider.addEventListener( 'touchend', onSliderChange, false )
+const y_slider = document.getElementById( 'y' )
+y_slider.addEventListener( 'mouseup', onSliderChange, false )
+y_slider.addEventListener( 'touchend', onSliderChange, false )
 
 let _threeMesh, _threeMaterial, rhino
 
@@ -23,6 +36,18 @@ rhino3dm().then(async m => {
  * Call appserver
  */
 async function compute(){
+
+  // initialise 'data' object that will be used by compute()
+  const data = {
+    definition: definition,
+    inputs: {
+      'int_k':document.getElementById('clusters').valueAsNumber,
+      'int_dimension':document.getElementById('dimension').valueAsNumber,
+      'int_resolution':document.getElementById('resolution').valueAsNumber,
+      'num_x':document.getElementById('x').valueAsNumber,
+      'num_y':document.getElementById('y').valueAsNumber  
+    }
+  }
 
   console.log(data.inputs)
 
@@ -68,6 +93,8 @@ async function compute(){
     })
     console.log(color_data)
 
+    const overlay = document.getElementById('overlay')
+
     //add legend
     let legend = document.getElementById('legend')
     if(!legend){
@@ -76,7 +103,7 @@ async function compute(){
       legend.style.width = '30px'
       legend.style.zIndex = 2
       legend.style.position = 'relative'
-      document.body.appendChild(legend)
+      overlay.appendChild(legend)
     } else {
       while (legend.firstChild) {
         legend.removeChild(legend.lastChild);
@@ -105,15 +132,6 @@ async function compute(){
 function onSliderChange () {
   // show spinner
   document.getElementById('loader').style.display = 'block'
-
-  // get slider values
-  data.inputs = {
-    'int_k':document.getElementById('clusters').valueAsNumber,
-    'int_dimension':document.getElementById('dimension').valueAsNumber,
-    'int_resolution':document.getElementById('resolution').valueAsNumber,
-    'num_x':document.getElementById('x').valueAsNumber,
-    'num_y':document.getElementById('y').valueAsNumber
-  }
   compute()
 }
 
@@ -122,6 +140,10 @@ function onSliderChange () {
 var scene, camera, renderer, controls
 
 function init () {
+
+  // Rhino models are z-up, so set this as the default
+  THREE.Object3D.DefaultUp = new THREE.Vector3( 0, 0, 1 );
+
   scene = new THREE.Scene()
   scene.background = new THREE.Color(1,1,1)
   camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 )
@@ -129,10 +151,9 @@ function init () {
   renderer = new THREE.WebGLRenderer({antialias: true})
   renderer.setPixelRatio( window.devicePixelRatio )
   renderer.setSize( window.innerWidth, window.innerHeight )
-  let canvas = document.getElementById('canvas')
-  canvas.appendChild( renderer.domElement )
+  document.body.appendChild(renderer.domElement)
 
-  controls = new THREE.OrbitControls( camera, renderer.domElement  )
+  controls = new OrbitControls( camera, renderer.domElement  )
 
   camera.position.z = 50
 

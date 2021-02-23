@@ -20,7 +20,7 @@ app.use(compression())
 // - For local debugging on the same computer, compute.geometry.exe is
 //   typically running at http://localhost:8081/
 // - For a production environment it is good to use an environment variable
-//   named COMPUTE_URL to define where the compute server is located
+//   named RHINO_COMPUTE_URL to define where the compute server is located
 // - And just in case, you can pass an address as a command line arg
 
 const argIndex = process.argv.indexOf('--computeUrl')
@@ -35,7 +35,7 @@ app.set('view engine', 'hbs');
 app.set('views', './src/views')
 
 // Routes for this app
-app.use('/example', express.static(__dirname + '/example'))
+app.use('/examples', express.static(__dirname + '/examples'))
 app.get('/favicon.ico', (req, res) => res.status(200))
 app.use('/definition', require('./routes/definition'))
 app.use('/solve', require('./routes/solve'))

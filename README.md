@@ -24,7 +24,7 @@ This app is intended to host one or more custom grasshopper definitions and serv
 ## Example
 When we have our testing server up and running, you can visit
 
-https://compute-rhino3d-appserver.herokuapp.com/example/
+https://compute-rhino3d-appserver.herokuapp.com/examples/
 
 To see a sample web application that passes three numbers based on slider positions to the AppServer for solving a grasshopper definition. Results are returned to the web page and new mesh visualizations are created.
 

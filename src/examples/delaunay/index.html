@@ -72,7 +72,7 @@ loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
 const data = {
   definition: 'delaunay.gh',
   inputs: {
-    'points': [] // start with an empty list (corresponds to "RH_IN:points" input)
+    'points': [] // start with an empty list (corresponds to "points" input)
   }
 }
 
@@ -186,6 +186,8 @@ function collectResults(responseJson) {
 
     const values = responseJson.values
 
+    console.log(values)
+
     // clear doc
     try {
     if( doc !== undefined)
@@ -288,7 +290,7 @@ function onClick( event ) {
   // add json-encoded Point3d to list
   // e.g. '{ "X": 1.0, "Y": 2.0, "Z": 0.0 }'
   const pt = "{\"X\":"+mouse.x+",\"Y\":"+mouse.y+",\"Z\":"+mouse.z+"}"
-  // in delaunay.gh the input is "RH_IN:points"
+  // in delaunay.gh the input is "points"
   data.inputs['points'].push(pt)
 
   // don't bother solving until we have three points

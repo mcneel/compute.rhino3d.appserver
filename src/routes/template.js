@@ -61,7 +61,7 @@ router.get('/:name', async (req, res, next) => {
   }
 
   for (const input of definition.inputs) {
-    const name = input.name.replace(/^RH_IN:/, '')
+    const name = input.name
     const id = name
     switch (input.paramType) {
       case 'Integer':

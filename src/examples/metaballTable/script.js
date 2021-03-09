@@ -1,6 +1,7 @@
 /* eslint no-undef: "off", no-unused-vars: "off" */
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.126.0/build/three.module.js'
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.126.0/examples/jsm/controls/OrbitControls.js'
+import { TransformControls } from 'https://cdn.jsdelivr.net/npm/three@0.126.0/examples/jsm/controls/TransformControls.js'
 import { Rhino3dmLoader } from 'https://cdn.jsdelivr.net/npm/three@0.126.0/examples/jsm/loaders/3DMLoader.js'
 import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/rhino3dm.module.js'
 
@@ -19,9 +20,6 @@ height_slider.addEventListener( 'mouseup', onSliderChange, false )
 height_slider.addEventListener( 'touchend', onSliderChange, false )
 
 let points = []
-points.push( "{\"X\":"+279+",\"Y\":"+218+",\"Z\":"+0+"}")
-points.push( "{\"X\":"+-181+",\"Y\":"+218+",\"Z\":"+0+"}")
-points.push( "{\"X\":"+49+",\"Y\":"+-212+",\"Z\":"+0+"}")
 
 let rhino, doc
 
@@ -30,13 +28,77 @@ rhino3dm().then(async m => {
   rhino = m // global
 
   init()
+  rndPts()
   compute()
 })
+
+function rndPts() {
+  // generate random points
+
+  const cntPts = 3
+  const bndX = dimension_slider.valueAsNumber / 2
+  const bndY = dimension_slider.valueAsNumber / 2
+
+  for (let i = 0; i < cntPts; i++) {
+    const x = Math.random() * (bndX - -bndX) + -bndX
+    const y = Math.random() * (bndY - -bndY) + -bndY
+    const z = 0
+
+    const pt = "{\"X\":" + x + ",\"Y\":" + y + ",\"Z\":" + z + "}"
+
+    console.log( `x ${x} y ${y}` )
+
+    points.push(pt)
+
+    //viz in three
+    const icoGeo = new THREE.IcosahedronGeometry(25)
+    const icoMat = new THREE.MeshNormalMaterial()
+    const ico = new THREE.Mesh( icoGeo, icoMat )
+    ico.name = 'ico'
+    ico.position.set( x, y, z)
+    scene.add( ico )
+    
+    let tcontrols = new TransformControls( camera, renderer.domElement )
+    tcontrols.enabled = true
+    tcontrols.attach( ico )
+    tcontrols.showZ = false
+    tcontrols.addEventListener( 'dragging-changed', onChange )
+    scene.add(tcontrols)
+    
+  }
+
+}
+
+let dragging = false
+function onChange() {
+  dragging = ! dragging
+  if ( !dragging ) {
+    // update points position
+    points = []
+    scene.traverse(child => {
+      if ( child.name === 'ico' ) {
+        const pt = "{\"X\":" + child.position.x + ",\"Y\":" + child.position.y + ",\"Z\":" + child.position.z + "}"
+        points.push( pt )
+        console.log(pt)
+      }
+    }, false)
+
+    compute()
+
+    controls.enabled = true
+    return 
+}
+
+  controls.enabled = false
+
+}
 
 /**
  * Call appserver
  */
-async function compute(){
+async function compute () {
+
+  showSpinner(true)
 
   // initialise 'data' object that will be used by compute()
   const data = {
@@ -81,8 +143,8 @@ async function compute(){
 
   // clear doc
   try {
-  if( doc !== undefined)
-      doc.delete()
+    if( doc !== undefined)
+        doc.delete()
   } catch {}
 
   //console.log(values)
@@ -111,23 +173,21 @@ async function compute(){
     return
   }
 
-  // hack (https://github.com/mcneel/rhino3dm/issues/353)
-  //doc.objects().addSphere(new rhino.Sphere([0,0,0], 0.001), null)
-
   // load rhino doc into three.js scene
   const buffer = new Uint8Array(doc.toByteArray()).buffer
   loader.parse( buffer, function ( object ) 
   {
+
       // clear objects from scene
       scene.traverse(child => {
-        if (!child.isLight) {
-          scene.remove(child)
+        if ( child.userData.hasOwnProperty( 'objectType' ) && child.userData.objectType === 'File3dm') {
+          scene.remove( child )
         }
       })
 
       ///////////////////////////////////////////////////////////////////////
       
-      // render wireframe mesh
+      // color crvs
       object.traverse(child => {
         if (child.isLine) {
           if (child.userData.attributes.geometry.userStringCount > 0) {
@@ -138,13 +198,9 @@ async function compute(){
             child.material = mat
           }
         }
-      }, false)
+      })
 
       ///////////////////////////////////////////////////////////////////////
-
-
-      
-
       // add object graph from rhino model to three.js scene
       scene.add( object )
 
@@ -152,8 +208,6 @@ async function compute(){
       showSpinner(false)
       //downloadButton.disabled = false
 
-      // zoom to extents
-      zoomCameraToSelection(camera, controls, scene.children)
   })
 }
 
@@ -204,10 +258,10 @@ function init () {
 
   scene = new THREE.Scene()
   scene.background = new THREE.Color(1,1,1)
-  camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 )
-  camera.position.x = 50
-  camera.position.y = 50
-  camera.position.z = 50
+  camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 10000 )
+  camera.position.x = 1000
+  camera.position.y = 1000
+  camera.position.z = 1000
 
   renderer = new THREE.WebGLRenderer({antialias: true})
   renderer.setPixelRatio( window.devicePixelRatio )

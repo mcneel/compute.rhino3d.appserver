@@ -79,6 +79,7 @@ rhino3dm().then(async m => {
     rhino = m
 
     init()
+    loadContext()
     compute()
 })
 
@@ -158,6 +159,15 @@ function init() {
     window.addEventListener( 'resize', onWindowResize, false )
 
     animate()
+}
+
+function loadContext() {
+  loader.load('context.3dm', function (object) {
+    object.traverse(child => {
+      child.name = 'context'
+    })
+    scene.add(object)
+  })
 }
 
 /**
@@ -241,7 +251,7 @@ function collectResults(responseJson) {
 
         // clear objects from scene. do this here to avoid blink
         scene.traverse(child => {
-            if (!child.isLight) {
+            if (!child.isLight && child.name !== 'context') {
                 scene.remove(child)
             }
         })

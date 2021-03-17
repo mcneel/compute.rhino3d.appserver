@@ -3,18 +3,26 @@
     <head>
         <meta charset="utf-8">
         <link rel="icon" href="data:,">
-        <title>{{name}}</title>
+        <title>hull.gh</title>
         <style>
+/* /////////////////////////////////////////////////////////////////////////// */
             body {
                 margin: 0;
-                font-family: Arial, Helvetica, sans-serif;
+                font-family: monospace;
+                color: #f3f3f3;
             }
+/* /////////////////////////////////////////////////////////////////////////// */
             canvas { width: 100%; height: 100%; }
             input[type=range] { width: 100%; }
             #container { position: relative; }
             #container canvas, #overlay { position: absolute; }
             #overlay { z-index: 1; width: 100%; }
-            #overlay div { padding: 5px; }
+/* /////////////////////////////////////////////////////////////////////////// */
+            #overlay div {
+              padding: 5px;
+              text-align-last: center;
+              }
+/* /////////////////////////////////////////////////////////////////////////// */
             #loader {
                 border: 5px solid #f3f3f3; /* Light grey */
                 border-top: 5px solid #3d3d3d; /* Grey */
@@ -37,22 +45,15 @@
         <div id="loader"></div> 
         <div id="container">
             <div id="overlay">
-                {{#each inputs}}
+<!-- /////////////////////////////////////////////////////////////////////////// -->
                 <div>
-                  <label for="{{id}}">{{name}}</label>
-                  {{#number}}
-                  <input type="number" id="{{../id}}" value="{{value}}">
-                  {{/number}}
-                  {{#range}}
-                  <input type="range" id="{{../id}}" min="{{min}}" max="{{max}}" value="{{value}}" step="{{step}}">
-                  {{/range}}
-                  {{#bool}}
-                  <input type="checkbox" id="{{../id}}" {{#value}}checked{{/value}}>
-                  {{/bool}}
+                    <h1>Upload 3DM file</h1>
+                    <input type="file" accept=".3dm" id="file-input" />
                 </div>
-                {{/each}}
+                <div id="msg">Choose a .3dm file that has breps and/or extrusions ☝</div>
                 <div><button id="downloadButton" disabled>Download</button></div>
-                <div><a href="{{name}}" download="{{name}}.html">Save source code</a></div>
+                <!-- <div><a href="hull.gh" download="hull.gh.html">Save source code</a></div> -->
+<!-- /////////////////////////////////////////////////////////////////////////// -->
             </div>
         </div>
 
@@ -68,8 +69,10 @@ loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
 
 // initialise 'data' object that will be used by compute()
 const data = {
-  definition: '{{name}}',
-  inputs: getInputs()
+  definition: 'brep_union.gh',
+  inputs: {
+    breps: []
+  }
 }
 
 // globals
@@ -79,7 +82,7 @@ rhino3dm().then(async m => {
     rhino = m
 
     init()
-    compute()
+    // compute()
 })
 
 const downloadButton = document.getElementById("downloadButton")
@@ -89,33 +92,72 @@ downloadButton.onclick = download
  //                            HELPER  FUNCTIONS                            //
 /////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////
+async function readSingleFile(e) {
+  // get file
+  var file = e.target.files[0]
+  if (!file) {
+    document.getElementById('msg').innerText = 'Something went wrong...'
+    return
+  }
+
+  // try to open 3dm file
+  const buffer = await file.arrayBuffer()
+  const uploadDoc = rhino.File3dm.fromByteArray(new Uint8Array(buffer))
+
+  if (uploadDoc === null) {
+    document.getElementById('msg').innerText = 'Must be a .3dm file!'
+    return
+  }
+
+  // get geometry from file
+  const objs = uploadDoc.objects()
+  const geometry = []
+  for (let i = 0; i < objs.count; i++) {
+    const geom = objs.get(i).geometry()
+    // filter for geometry of a specific type
+    if (geom instanceof rhino.Brep || geom instanceof rhino.Extrusion) {
+      geometry.push(JSON.stringify(geom))
+    }
+  }
+
+  // solve!
+  data.inputs.breps = geometry
+  compute()
+}
+
+// register event listener for file input
+document.getElementById('file-input')
+  .addEventListener('change', readSingleFile, false);
+///////////////////////////////////////////////////////////////////////////
+
 /**
  * Gets <input> elements from html and sets handlers
  * (html is generated from the grasshopper definition)
  */
-function getInputs() {
-  const inputs = {}
-  for (const input of document.getElementsByTagName('input')) {
-    switch (input.type) {
-      case 'number':
-        inputs[input.id] = input.valueAsNumber
-        input.onchange = onSliderChange
-        break
-      case 'range':
-        inputs[input.id] = input.valueAsNumber
-        input.onmouseup = onSliderChange
-        input.ontouchend = onSliderChange
-        break
-      case 'checkbox':
-        inputs[input.id] = input.checked
-        input.onclick = onSliderChange
-        break
-      default:
-        break
-    }
-  }
-  return inputs
-}
+// function getInputs() {
+//   const inputs = {}
+//   for (const input of document.getElementsByTagName('input')) {
+//     switch (input.type) {
+//       case 'number':
+//         inputs[input.id] = input.valueAsNumber
+//         input.onchange = onSliderChange
+//         break
+//       case 'range':
+//         inputs[input.id] = input.valueAsNumber
+//         input.onmouseup = onSliderChange
+//         input.ontouchend = onSliderChange
+//         break
+//       case 'checkbox':
+//         inputs[input.id] = input.checked
+//         input.onclick = onSliderChange
+//         break
+//       default:
+//         break
+//     }
+//   }
+//   return inputs
+// }
 
 // more globals
 let scene, camera, renderer, controls
@@ -135,7 +177,7 @@ function init() {
     camera.position.set(1, -1, 1) // like perspective view
 
     // very light grey for background, like rhino
-    scene.background = new THREE.Color('whitesmoke')
+    scene.background = new THREE.Color('black')
 
     // create the renderer and add it to the html
     renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -164,13 +206,19 @@ function init() {
  * Call appserver
  */
 async function compute() {
-  // construct url for GET /solve/definition.gh?name=value(&...)
-  const url = new URL('/solve/' + data.definition, window.location.origin)
-  Object.keys(data.inputs).forEach(key => url.searchParams.append(key, data.inputs[key]))
-  console.log(url.toString())
+///////////////////////////////////////////////////////////////////////////
+  showSpinner(true)
+
+  // use POST request
+  const request = {
+    'method':'POST',
+    'body': JSON.stringify(data),
+    'headers': {'Content-Type': 'application/json'}
+  }
   
   try {
-    const response = await fetch(url)
+    const response = await fetch('/solve', request)
+///////////////////////////////////////////////////////////////////////////
   
     if(!response.ok) {
       // TODO: check for errors in response json
@@ -178,6 +226,8 @@ async function compute() {
     }
 
     const responseJson = await response.json()
+
+    console.log(responseJson)
 
     collectResults(responseJson)
 
@@ -222,17 +272,27 @@ function collectResults(responseJson) {
       return
     }
 
+///////////////////////////////////////////////////////////////////////////
+    const countBefore = data.inputs.breps.length
+    const countAfter = doc.objects().count
+    document.getElementById('msg').innerText = `${countBefore} breps become ${countAfter}!`
+
+    // hack (https://github.com/mcneel/rhino3dm/issues/353)
+    const sphereAttrs = new rhino.ObjectAttributes()
+    sphereAttrs.mode = rhino.ObjectMode.Hidden
+    doc.objects().addSphere(new rhino.Sphere([0,0,0], 0.001), sphereAttrs)
+///////////////////////////////////////////////////////////////////////////
+
     // load rhino doc into three.js scene
     const buffer = new Uint8Array(doc.toByteArray()).buffer
     loader.parse( buffer, function ( object ) 
     {
-        // debug 
-        /*
+///////////////////////////////////////////////////////////////////////////
         object.traverse(child => {
-          if (child.material !== undefined)
-            child.material = new THREE.MeshNormalMaterial()
+          if (child.isMesh)
+            child.material = new THREE.MeshNormalMaterial({ wireframe: true })
         }, false)
-        */
+///////////////////////////////////////////////////////////////////////////
 
         // clear objects from scene. do this here to avoid blink
         scene.traverse(child => {
@@ -273,28 +333,28 @@ function decodeItem(item) {
  * Called when a slider value changes in the UI. Collect all of the
  * slider values and call compute to solve for a new scene
  */
-function onSliderChange () {
-  showSpinner(true)
-  // get slider values
-  let inputs = {}
-  for (const input of document.getElementsByTagName('input')) {
-    switch (input.type) {
-    case 'number':
-      inputs[input.id] = input.valueAsNumber
-      break
-    case 'range':
-      inputs[input.id] = input.valueAsNumber
-      break
-    case 'checkbox':
-      inputs[input.id] = input.checked
-      break
-    }
-  }
+// function onSliderChange () {
+//   showSpinner(true)
+//   // get slider values
+//   let inputs = {}
+//   for (const input of document.getElementsByTagName('input')) {
+//     switch (input.type) {
+//     case 'number':
+//       inputs[input.id] = input.valueAsNumber
+//       break
+//     case 'range':
+//       inputs[input.id] = input.valueAsNumber
+//       break
+//     case 'checkbox':
+//       inputs[input.id] = input.checked
+//       break
+//     }
+//   }
   
-  data.inputs = inputs
+//   data.inputs = inputs
 
-  compute()
-}
+//   compute()
+// }
 
 /**
  * The animation loop!

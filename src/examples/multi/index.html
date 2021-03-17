@@ -3,11 +3,11 @@
     <head>
         <meta charset="utf-8">
         <link rel="icon" href="data:,">
-        <title>{{name}}</title>
+        <title>rnd_lattice.gh and rnd_node.gh</title>
         <style>
             body {
                 margin: 0;
-                font-family: Arial, Helvetica, sans-serif;
+                font-family: monospace;
             }
             canvas { width: 100%; height: 100%; }
             input[type=range] { width: 100%; }
@@ -37,22 +37,37 @@
         <div id="loader"></div> 
         <div id="container">
             <div id="overlay">
-                {{#each inputs}}
+<!-- /////////////////////////////////////////////////////////////////////////// -->
+                
+                <!-- drop-down menu for grasshopper files -->
                 <div>
-                  <label for="{{id}}">{{name}}</label>
-                  {{#number}}
-                  <input type="number" id="{{../id}}" value="{{value}}">
-                  {{/number}}
-                  {{#range}}
-                  <input type="range" id="{{../id}}" min="{{min}}" max="{{max}}" value="{{value}}" step="{{step}}">
-                  {{/range}}
-                  {{#bool}}
-                  <input type="checkbox" id="{{../id}}" {{#value}}checked{{/value}}>
-                  {{/bool}}
+                  <h2>Multiple files!</h2>
+                  <label for="files">Choose a file:</label>
+                  <select name="files" id="files">
+                    <option value="rnd_lattice.gh">rnd_lattice.gh</option>
+                    <option value="rnd_node.gh">rnd_node.gh</option>
+                  </select>
                 </div>
-                {{/each}}
+
+                <!-- create empty "inputs" div that we can populate with inputs when
+                     onDropdownChanged() is called -->
+                <div id="inputs">
+                  <!-- <div>
+                    <label for="boxSize">boxSize</label>
+                    <input type="range" id="boxSize" min="0.5" max="10" value="10" step="1">
+                  </div>
+                  <div>
+                    <label for="count">count</label>
+                    <input type="range" id="count" min="10" max="100" value="42" step="1">
+                  </div>
+                  <div>
+                    <label for="nodeSize">nodeSize</label>
+                    <input type="range" id="nodeSize" min="3" max="10" value="7" step="1">
+                  </div> -->
+                </div>
+<!-- /////////////////////////////////////////////////////////////////////////// -->
                 <div><button id="downloadButton" disabled>Download</button></div>
-                <div><a href="{{name}}" download="{{name}}.html">Save source code</a></div>
+                <div><a href="rnd_lattice.gh" download="rnd_lattice.gh.html">Save source code</a></div>
             </div>
         </div>
 
@@ -68,9 +83,14 @@ loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
 
 // initialise 'data' object that will be used by compute()
 const data = {
-  definition: '{{name}}',
+  definition: 'rnd_lattice.gh',
   inputs: getInputs()
 }
+
+///////////////////////////////////////////////////////////////////////////
+const dropdown = document.getElementById("files")
+dropdown.onchange = onDropdownChange
+///////////////////////////////////////////////////////////////////////////
 
 // globals
 let rhino, doc
@@ -79,7 +99,10 @@ rhino3dm().then(async m => {
     rhino = m
 
     init()
-    compute()
+///////////////////////////////////////////////////////////////////////////
+    // compute()
+    onDropdownChange() // manually trigger ui update (calls compute())
+///////////////////////////////////////////////////////////////////////////
 })
 
 const downloadButton = document.getElementById("downloadButton")
@@ -116,6 +139,66 @@ function getInputs() {
   }
   return inputs
 }
+
+///////////////////////////////////////////////////////////////////////////
+/**
+ * Handle events when drop-down is changed
+ */
+function onDropdownChange(event) {
+  data.definition = dropdown.value
+  console.log(dropdown.value)
+  updateInputs()
+}
+
+/**
+ * Update "inputs" div in html and trigger re-solve
+ */
+async function updateInputs() {
+  const response = await fetch('/' + data.definition)
+  // console.log(response)
+  const responseJson = await response.json()
+  
+  const inputsDiv = document.getElementById('inputs')
+  let inputsHtml = ''
+
+  // build <input> tag for input (based on code in template.js)
+  for (const input of responseJson.inputs) {
+    let html = ''
+    switch (input.paramType) {
+      case 'Integer':
+        html = `<input type="number" id="${input.name}" value="${input.default}">`
+        break;
+      case 'Number':
+        if (input.minimum !== undefined && input.minimum !== null
+            && input.maximum !== undefined && input.maximum !== null)
+        {
+          // use range input if min and max set
+          html = `<input type="range" id="${input.name}" min="${input.minimum}" max="${input.maximum}" value="${input.default}" step="1">`
+        } else {
+          // otherwise use number input
+          html = `<input type="number" id="${input.name}" value="${input.default}">`
+        }
+        break
+      case 'Boolean':
+        const checked = input.default ? 'checked' : ''
+        html = `<input type="checkbox" id="${input.name}" ${checked}>`
+        break
+    }
+    if (html.length > 0) {
+      // if we found an input that we can handle, add it to the collection with a label
+      inputsHtml = inputsHtml + '\n' + `<label for="${input.name}">${input.name}</label>` + '\n' + html
+    }
+  }
+  // console.log(inputsHtml)
+
+  // replace inputs in html
+  inputsDiv.innerHTML = inputsHtml
+
+  // update inputs and re-solve by manually triggering a "slider change"
+  data.inputs = getInputs()
+  onSliderChange()
+}
+///////////////////////////////////////////////////////////////////////////
 
 // more globals
 let scene, camera, renderer, controls
@@ -165,7 +248,11 @@ function init() {
  */
 async function compute() {
   // construct url for GET /solve/definition.gh?name=value(&...)
+///////////////////////////////////////////////////////////////////////////
+  // update call to compute to use data.definition, instead of hard-coding
+  // the grasshopper file name
   const url = new URL('/solve/' + data.definition, window.location.origin)
+///////////////////////////////////////////////////////////////////////////
   Object.keys(data.inputs).forEach(key => url.searchParams.append(key, data.inputs[key]))
   console.log(url.toString())
   
@@ -226,13 +313,14 @@ function collectResults(responseJson) {
     const buffer = new Uint8Array(doc.toByteArray()).buffer
     loader.parse( buffer, function ( object ) 
     {
-        // debug 
-        /*
+///////////////////////////////////////////////////////////////////////////
+        // change mesh material
         object.traverse(child => {
-          if (child.material !== undefined)
-            child.material = new THREE.MeshNormalMaterial()
+          if (child.isMesh) {
+            child.material = new THREE.MeshNormalMaterial({ wireframe: true})
+          }
         }, false)
-        */
+///////////////////////////////////////////////////////////////////////////
 
         // clear objects from scene. do this here to avoid blink
         scene.traverse(child => {

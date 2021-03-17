@@ -3,18 +3,26 @@
     <head>
         <meta charset="utf-8">
         <link rel="icon" href="data:,">
-        <title>{{name}}</title>
+        <title>hull.gh</title>
         <style>
+/* /////////////////////////////////////////////////////////////////////////// */
             body {
                 margin: 0;
-                font-family: Arial, Helvetica, sans-serif;
+                font-family: monospace;
+                color: #f3f3f3;
             }
+/* /////////////////////////////////////////////////////////////////////////// */
             canvas { width: 100%; height: 100%; }
             input[type=range] { width: 100%; }
             #container { position: relative; }
             #container canvas, #overlay { position: absolute; }
             #overlay { z-index: 1; width: 100%; }
-            #overlay div { padding: 5px; }
+/* /////////////////////////////////////////////////////////////////////////// */
+            #overlay div {
+              padding: 5px;
+              text-align-last: center;
+              }
+/* /////////////////////////////////////////////////////////////////////////// */
             #loader {
                 border: 5px solid #f3f3f3; /* Light grey */
                 border-top: 5px solid #3d3d3d; /* Grey */
@@ -26,6 +34,7 @@
                 top: 50%;
                 left: 50%;
                 z-index: 2;
+                display: none;
             }
             @keyframes spin {
                 0% { transform: rotate(0deg); }
@@ -37,22 +46,19 @@
         <div id="loader"></div> 
         <div id="container">
             <div id="overlay">
-                {{#each inputs}}
+<!-- /////////////////////////////////////////////////////////////////////////// -->
                 <div>
-                  <label for="{{id}}">{{name}}</label>
-                  {{#number}}
-                  <input type="number" id="{{../id}}" value="{{value}}">
-                  {{/number}}
-                  {{#range}}
-                  <input type="range" id="{{../id}}" min="{{min}}" max="{{max}}" value="{{value}}" step="{{step}}">
-                  {{/range}}
-                  {{#bool}}
-                  <input type="checkbox" id="{{../id}}" {{#value}}checked{{/value}}>
-                  {{/bool}}
+                    <h1>Upload audio file</h1>
+                    <input type="file" accept="audio/*" id="file-input" />
                 </div>
-                {{/each}}
+                <div id="msg">Choose an audio file ☝</div>
+                <!-- <div>
+                  <label for="height">height</label>
+                  <input type="range" id="RH_IN:height" min="100" max="1000" value="500" step="1">
+                </div> -->
                 <div><button id="downloadButton" disabled>Download</button></div>
-                <div><a href="{{name}}" download="{{name}}.html">Save source code</a></div>
+                <!-- <div><a href="hull.gh" download="hull.gh.html">Save source code</a></div> -->
+<!-- /////////////////////////////////////////////////////////////////////////// -->
             </div>
         </div>
 
@@ -66,11 +72,13 @@ import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/rhino3dm
 const loader = new Rhino3dmLoader()
 loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
 
+///////////////////////////////////////////////////////////////////////////
 // initialise 'data' object that will be used by compute()
 const data = {
-  definition: '{{name}}',
-  inputs: getInputs()
+  definition: 'awesome_grasshopper_file.gh',
+  inputs: {} // we'll assign data to this later!
 }
+///////////////////////////////////////////////////////////////////////////
 
 // globals
 let rhino, doc
@@ -79,7 +87,7 @@ rhino3dm().then(async m => {
     rhino = m
 
     init()
-    compute()
+    // compute()
 })
 
 const downloadButton = document.getElementById("downloadButton")
@@ -89,33 +97,142 @@ downloadButton.onclick = download
  //                            HELPER  FUNCTIONS                            //
 /////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////
+
+let audioCtx, source, analyser
+let dataArray
+let start, sample1, sample2
+
+/**
+ * load file and process audio
+ */
+async function readSingleFile(e) {
+
+  showSpinner(true)
+
+  audioCtx = window.webkitAdioContext ? new window.webkitAudioContext() : new window.AudioContext()
+  source = audioCtx.createBufferSource()
+
+  // get file
+  var file = e.target.files[0]
+  if (!file) {
+    document.getElementById('msg').innerText = 'Something went wrong...'
+    return
+  }
+
+  // try to open audio file
+  const buffer = await file.arrayBuffer()
+  const decodedData = await audioCtx.decodeAudioData(buffer)
+
+  document.getElementById('msg').innerText = 'Processing audio... 🎵'
+
+  // load audio data
+  const myBuffer = decodedData
+  console.log(decodedData.duration) // TODO: check duration is long enough to sample
+  source.buffer = myBuffer
+  source.connect(audioCtx.destination)
+
+  // create audio analyser
+  analyser = audioCtx.createAnalyser()
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
+  analyser.fftSize = 256;
+
+  // set up variables for processing
+  dataArray = new Uint8Array(analyser.frequencyBinCount)
+  start = undefined
+  sample1 = undefined
+  sample2 = undefined
+
+  // start playing audio
+  // (start from 20 seconds into track)
+  source.start(0, 20)
+
+  // start processing
+  requestAnimationFrame(processAudio)
+
+}
+
+// register event listener for file input
+document.getElementById('file-input')
+  .addEventListener('change', readSingleFile, false);
+
+// use animation frame loop to sample audio at approximately 2 and 4 seconds
+function processAudio(timestamp) {
+  // calculate elapsed time
+  // see https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
+  if (start === undefined)
+    start = timestamp
+  const elapsed = timestamp - start
+
+  // console.log(elapsed)
+
+  // get freqency data
+  analyser.getByteFrequencyData(dataArray);
+
+  // take the first sample at ~2 seconds
+  if (sample1 === undefined && elapsed > 2000) {
+    sample1 = Array.from(dataArray)
+    document.getElementById('msg').innerText = 'Processing audio... 🎵🎵'
+  }
+
+  // take the second sample at ~4 seconds
+  if (sample2 === undefined && elapsed > 4000) {
+    sample2 = Array.from(dataArray)
+    document.getElementById('msg').innerText = 'Processing audio... 🎵🎵🎵'
+  }
+
+  if (elapsed < 5000) { // while less than 5 seconds (5000ms), keep playing
+
+    requestAnimationFrame(processAudio)
+
+  } else {
+
+    // stop processing after 5 seconds
+    source.stop()
+
+    // add frequencies to input data
+    data.inputs.sample1 = sample1
+    data.inputs.sample2 = sample2
+    console.log(data) // check data
+
+    document.getElementById('msg').innerText = 'OK! Now what?? (Check the console for sampled freqency data...)'
+
+    // TODO!
+    // solve grasshopper file on appserver
+    // compute()
+
+  }
+}
+///////////////////////////////////////////////////////////////////////////
+
 /**
  * Gets <input> elements from html and sets handlers
  * (html is generated from the grasshopper definition)
  */
-function getInputs() {
-  const inputs = {}
-  for (const input of document.getElementsByTagName('input')) {
-    switch (input.type) {
-      case 'number':
-        inputs[input.id] = input.valueAsNumber
-        input.onchange = onSliderChange
-        break
-      case 'range':
-        inputs[input.id] = input.valueAsNumber
-        input.onmouseup = onSliderChange
-        input.ontouchend = onSliderChange
-        break
-      case 'checkbox':
-        inputs[input.id] = input.checked
-        input.onclick = onSliderChange
-        break
-      default:
-        break
-    }
-  }
-  return inputs
-}
+// function getInputs() {
+//   const inputs = {}
+//   for (const input of document.getElementsByTagName('input')) {
+//     switch (input.type) {
+//       case 'number':
+//         inputs[input.id] = input.valueAsNumber
+//         input.onchange = onSliderChange
+//         break
+//       case 'range':
+//         inputs[input.id] = input.valueAsNumber
+//         input.onmouseup = onSliderChange
+//         input.ontouchend = onSliderChange
+//         break
+//       case 'checkbox':
+//         inputs[input.id] = input.checked
+//         input.onclick = onSliderChange
+//         break
+//       default:
+//         break
+//     }
+//   }
+//   return inputs
+// }
 
 // more globals
 let scene, camera, renderer, controls
@@ -135,7 +252,7 @@ function init() {
     camera.position.set(1, -1, 1) // like perspective view
 
     // very light grey for background, like rhino
-    scene.background = new THREE.Color('whitesmoke')
+    scene.background = new THREE.Color('black')
 
     // create the renderer and add it to the html
     renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -164,13 +281,19 @@ function init() {
  * Call appserver
  */
 async function compute() {
-  // construct url for GET /solve/definition.gh?name=value(&...)
-  const url = new URL('/solve/' + data.definition, window.location.origin)
-  Object.keys(data.inputs).forEach(key => url.searchParams.append(key, data.inputs[key]))
-  console.log(url.toString())
+///////////////////////////////////////////////////////////////////////////
+  showSpinner(true)
+
+  // use POST request
+  const request = {
+    'method':'POST',
+    'body': JSON.stringify(data),
+    'headers': {'Content-Type': 'application/json'}
+  }
   
   try {
-    const response = await fetch(url)
+    const response = await fetch('/solve', request)
+///////////////////////////////////////////////////////////////////////////
   
     if(!response.ok) {
       // TODO: check for errors in response json
@@ -178,6 +301,8 @@ async function compute() {
     }
 
     const responseJson = await response.json()
+
+    console.log(responseJson)
 
     collectResults(responseJson)
 
@@ -200,6 +325,10 @@ function collectResults(responseJson) {
     //console.log(values)
     doc = new rhino.File3dm()
 
+    // doc.objects().addSphere(new rhino.Sphere([0,0,0], 0.001), null)
+    // doc.objects().addPoint(0,0,0)
+    // doc.objects().addLine([0,0,0], [1,1,1])
+
     // for each output (RH_OUT:*)...
     for ( let i = 0; i < values.length; i ++ ) {
       // ...iterate through data tree structure...
@@ -210,29 +339,44 @@ function collectResults(responseJson) {
           // ...load rhino geometry into doc
           const rhinoObject = decodeItem(branch[j])
           if (rhinoObject !== null) {
+            console.log(rhinoObject)
             doc.objects().add(rhinoObject, null)
           }
         }
       }
     }
 
-    if (doc.objects().count < 1) {
-      console.error('No rhino objects to load!')
-      showSpinner(false)
-      return
-    }
+    // if (doc.objects().count < 1) {
+    //   console.error('No rhino objects to load!')
+    //   showSpinner(false)
+    //   return
+    // }
+
+///////////////////////////////////////////////////////////////////////////
+    const countBefore = data.inputs.breps.length
+    const countAfter = doc.objects().count
+    document.getElementById('msg').innerText = `${countBefore} breps become ${countAfter}!`
+
+    // hack (https://github.com/mcneel/rhino3dm/issues/353)
+    const sphereAttrs = new rhino.ObjectAttributes()
+    sphereAttrs.mode = rhino.ObjectMode.Hidden
+    doc.objects().addSphere(new rhino.Sphere([0,0,0], 0.001), sphereAttrs)
+    // doc.objects().addSphere(new rhino.Sphere([0,0,0], 0.001), null)
+    // doc.objects().addLine(new rhino.Line(0,0,0, 1,1,1), null)
+    console.log(doc.objects().count)
+///////////////////////////////////////////////////////////////////////////
 
     // load rhino doc into three.js scene
     const buffer = new Uint8Array(doc.toByteArray()).buffer
+    console.log(buffer.byteLength)
     loader.parse( buffer, function ( object ) 
     {
-        // debug 
-        /*
+///////////////////////////////////////////////////////////////////////////
         object.traverse(child => {
-          if (child.material !== undefined)
-            child.material = new THREE.MeshNormalMaterial()
+          if (child.isMesh)
+            child.material = new THREE.MeshNormalMaterial({ wireframe: true })
         }, false)
-        */
+///////////////////////////////////////////////////////////////////////////
 
         // clear objects from scene. do this here to avoid blink
         scene.traverse(child => {
@@ -273,28 +417,28 @@ function decodeItem(item) {
  * Called when a slider value changes in the UI. Collect all of the
  * slider values and call compute to solve for a new scene
  */
-function onSliderChange () {
-  showSpinner(true)
-  // get slider values
-  let inputs = {}
-  for (const input of document.getElementsByTagName('input')) {
-    switch (input.type) {
-    case 'number':
-      inputs[input.id] = input.valueAsNumber
-      break
-    case 'range':
-      inputs[input.id] = input.valueAsNumber
-      break
-    case 'checkbox':
-      inputs[input.id] = input.checked
-      break
-    }
-  }
+// function onSliderChange () {
+//   showSpinner(true)
+//   // get slider values
+//   let inputs = {}
+//   for (const input of document.getElementsByTagName('input')) {
+//     switch (input.type) {
+//     case 'number':
+//       inputs[input.id] = input.valueAsNumber
+//       break
+//     case 'range':
+//       inputs[input.id] = input.valueAsNumber
+//       break
+//     case 'checkbox':
+//       inputs[input.id] = input.checked
+//       break
+//     }
+//   }
   
-  data.inputs = inputs
+//   data.inputs = inputs
 
-  compute()
-}
+//   compute()
+// }
 
 /**
  * The animation loop!

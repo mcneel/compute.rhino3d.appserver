@@ -90,7 +90,8 @@ async function compute(){
     t1 = performance.now()
     const rebuildSceneTime = t1 - t0
 
-    console.log(`[call compute and rebuild scene] = ${Math.round(t1-timeComputeStart)} ms`)
+    console.group(`[call compute and rebuild scene] = ${Math.round(t1-timeComputeStart)} ms`)
+    //console.log(`[call compute and rebuild scene] = ${Math.round(t1-timeComputeStart)} ms`)
     console.log(`  ${Math.round(computeSolveTime)} ms: appserver request`)
     let timings = headers.split(',')
     let sum = 0
@@ -107,6 +108,7 @@ async function compute(){
     console.log(`  .. ${Math.round(computeSolveTime - sum)} ms: local<->appserver network latency`)
     console.log(`  ${Math.round(decodeMeshTime)} ms: decode json to rhino3dm mesh`)
     console.log(`  ${Math.round(rebuildSceneTime)} ms: create threejs mesh and insert in scene`)
+    console.groupEnd()
 
   } catch(error) {
     console.error(error)
@@ -129,6 +131,9 @@ function onSliderChange () {
 var scene, camera, renderer, controls
 
 function init () {
+  // Rhino models are z-up, so set this as the default
+  THREE.Object3D.DefaultUp = new THREE.Vector3( 0, 0, 1 );
+
   scene = new THREE.Scene()
   scene.background = new THREE.Color(1,1,1)
   camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 )
@@ -136,8 +141,7 @@ function init () {
   renderer = new THREE.WebGLRenderer({antialias: true})
   renderer.setPixelRatio( window.devicePixelRatio )
   renderer.setSize( window.innerWidth, window.innerHeight )
-  let canvas = document.getElementById('canvas')
-  canvas.appendChild( renderer.domElement )
+  document.body.appendChild(renderer.domElement)
 
   controls = new OrbitControls( camera, renderer.domElement  )
 

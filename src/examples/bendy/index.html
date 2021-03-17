@@ -3,18 +3,25 @@
     <head>
         <meta charset="utf-8">
         <link rel="icon" href="data:,">
-        <title>{{name}}</title>
+        <title>Bendy</title>
         <style>
             body {
                 margin: 0;
-                font-family: Arial, Helvetica, sans-serif;
+                font-family: monospace;
             }
             canvas { width: 100%; height: 100%; }
             input[type=range] { width: 100%; }
             #container { position: relative; }
             #container canvas, #overlay { position: absolute; }
-            #overlay { z-index: 1; width: 100%; }
-            #overlay div { padding: 5px; }
+/*///////////////////////////////////////////////////////////////////////////*/
+            #overlay {
+              z-index: 1;
+              width: 250px;
+              height: 100vh;
+              background-color: rgba(0,0,0,0.1);
+            }
+            #overlay div { padding: 5px 10px; }
+/*///////////////////////////////////////////////////////////////////////////*/
             #loader {
                 border: 5px solid #f3f3f3; /* Light grey */
                 border-top: 5px solid #3d3d3d; /* Grey */
@@ -37,22 +44,15 @@
         <div id="loader"></div> 
         <div id="container">
             <div id="overlay">
-                {{#each inputs}}
+<!-- /////////////////////////////////////////////////////////////////////////// -->
+                <div><h2>Bendy</h2></div>
                 <div>
-                  <label for="{{id}}">{{name}}</label>
-                  {{#number}}
-                  <input type="number" id="{{../id}}" value="{{value}}">
-                  {{/number}}
-                  {{#range}}
-                  <input type="range" id="{{../id}}" min="{{min}}" max="{{max}}" value="{{value}}" step="{{step}}">
-                  {{/range}}
-                  {{#bool}}
-                  <input type="checkbox" id="{{../id}}" {{#value}}checked{{/value}}>
-                  {{/bool}}
+                  <label for="RH_IN:iterations">RH_IN:iterations</label>
+                  <input type="range" id="RH_IN:iterations" min="0" max="1000" value="1000" step="1">
                 </div>
-                {{/each}}
                 <div><button id="downloadButton" disabled>Download</button></div>
-                <div><a href="{{name}}" download="{{name}}.html">Save source code</a></div>
+                <!-- <div><a href="_Bending_gridshell.gh" download="_Bending_gridshell.gh.html">Save source code</a></div> -->
+<!-- /////////////////////////////////////////////////////////////////////////// -->
             </div>
         </div>
 
@@ -68,7 +68,7 @@ loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
 
 // initialise 'data' object that will be used by compute()
 const data = {
-  definition: '{{name}}',
+  definition: 'Bending_gridshell.gh',
   inputs: getInputs()
 }
 
@@ -79,6 +79,7 @@ rhino3dm().then(async m => {
     rhino = m
 
     init()
+    loadContext()
     compute()
 })
 
@@ -160,6 +161,15 @@ function init() {
     animate()
 }
 
+function loadContext() {
+  loader.load('context.3dm', function (object) {
+    object.traverse(child => {
+      child.name = 'context'
+    })
+    scene.add(object)
+  })
+}
+
 /**
  * Call appserver
  */
@@ -222,6 +232,11 @@ function collectResults(responseJson) {
       return
     }
 
+    // hack (https://github.com/mcneel/rhino3dm/issues/353)
+    const sphereAttrs = new rhino.ObjectAttributes()
+    sphereAttrs.mode = rhino.ObjectMode.Hidden
+    doc.objects().addSphere(new rhino.Sphere([0,0,0], 0.001), sphereAttrs)
+
     // load rhino doc into three.js scene
     const buffer = new Uint8Array(doc.toByteArray()).buffer
     loader.parse( buffer, function ( object ) 
@@ -236,7 +251,7 @@ function collectResults(responseJson) {
 
         // clear objects from scene. do this here to avoid blink
         scene.traverse(child => {
-            if (!child.isLight) {
+            if (!child.isLight && child.name !== 'context') {
                 scene.remove(child)
             }
         })

@@ -31,7 +31,7 @@
   "license": "MIT",
   "preferGlobal": true,
   "engines": {
-    "node": ">=12.18.x"
+    "node": ">=12.22.x"
   },
   "main": "./bin/www",
   "bin": {
@@ -49,17 +49,17 @@
     "cors": "2.8.5",
     "debug": "~2.6.9",
     "express": "~4.16.1",
-    "hbs": "^4.1.1",
+    "hbs": "^4.2.0",
     "http-errors": "~1.6.3",
     "md5-file": "5.0.0",
     "memjs": "^1.2.2",
     "morgan": "~1.9.1",
     "node-cache": "^5.1.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "2.6.7",
     "rhino3dm": "0.13.0",
     "throng": "4.0.0"
   },
   "devDependencies": {
-    "eslint": "7.5.0"
+    "eslint": "8.7.0"
   }
 }

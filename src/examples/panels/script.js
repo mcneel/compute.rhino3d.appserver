@@ -71,7 +71,7 @@ async function compute(){
     document.getElementById('loader').style.display = 'none'
 
     // process mesh
-    let mesh_data = JSON.parse(responseJson.values[0].InnerTree['{ 0; }'][0].data)
+    let mesh_data = JSON.parse(responseJson.values[0].InnerTree['{0}'][0].data)
     let mesh = rhino.CommonObject.decode(mesh_data)
  
     if (!_threeMaterial) {
@@ -82,11 +82,11 @@ async function compute(){
     replaceCurrentMesh(threeMesh)
 
     //process data
-    let cluster_data = responseJson.values[1].InnerTree['{ 0; }'].map(d=>d.data)
+    let cluster_data = responseJson.values[1].InnerTree['{0}'].map(d=>d.data)
     console.log(cluster_data)
 
     //process colors
-    let color_data = responseJson.values[2].InnerTree['{ 0; }'].map( d=> {
+    let color_data = responseJson.values[2].InnerTree['{0}'].map( d=> {
 
       return 'rgb(' + JSON.parse(d.data) + ')'
 

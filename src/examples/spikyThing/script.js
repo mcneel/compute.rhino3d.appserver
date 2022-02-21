@@ -1,8 +1,12 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124.0/build/three.module.js'
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/controls/OrbitControls.js'
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.126.0/build/three.module.js'
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.126.0/examples/jsm/controls/OrbitControls.js'
+import { Rhino3dmLoader } from 'https://cdn.jsdelivr.net/npm/three@0.126.0/examples/jsm/loaders/3DMLoader.js'
 import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/rhino3dm.module.js'
 
 /* eslint no-undef: "off", no-unused-vars: "off" */
+
+const loader = new Rhino3dmLoader()
+loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
 
 const definition = 'BranchNodeRnd.gh'
 
@@ -18,7 +22,7 @@ length_slider.addEventListener( 'mouseup', onSliderChange, false )
 length_slider.addEventListener( 'touchend', onSliderChange, false )
 
 // load the rhino3dm library
-let rhino
+let rhino, doc
 rhino3dm().then(async m => {
   console.log('Loaded rhino3dm.')
   rhino = m // global
@@ -66,28 +70,32 @@ async function compute(){
     headers = response.headers.get('server-timing')
     const responseJson = await response.json()
 
+    collectResults(responseJson)
+
     // Request finished. Do processing here.
     let t1 = performance.now()
     const computeSolveTime = t1 - timeComputeStart
     t0 = t1
 
     // hide spinner
-    document.getElementById('loader').style.display = 'none'
+    //document.getElementById('loader').style.display = 'none'
+    //showSpinner(false)
     //console.log(responseJson.values[0])
-    let data = JSON.parse(responseJson.values[0].InnerTree['{0}'][0].data)
-    let mesh = rhino.DracoCompression.decompressBase64String(data)
+    //let data = JSON.parse(responseJson.values[0].InnerTree['{0}'][0].data)
+    //let mesh = rhino.DracoCompression.decompressBase64String(data)
       
     t1 = performance.now()
     const decodeMeshTime = t1 - t0
     t0 = t1
-
+/*
     if (!_threeMaterial) {
       _threeMaterial = new THREE.MeshNormalMaterial()
     }
+    
     let threeMesh = meshToThreejs(mesh, _threeMaterial)
     mesh.delete()
     replaceCurrentMesh(threeMesh)
-
+*/
     t1 = performance.now()
     const rebuildSceneTime = t1 - t0
 
@@ -118,12 +126,105 @@ async function compute(){
 }
 
 /**
+ * Parse response
+ */
+ function collectResults(responseJson) {
+
+  const values = responseJson.values
+
+  // clear doc
+  if( doc !== undefined)
+      doc.delete()
+
+  //console.log(values)
+  doc = new rhino.File3dm()
+
+  // for each output (RH_OUT:*)...
+  for ( let i = 0; i < values.length; i ++ ) {
+    // ...iterate through data tree structure...
+    for (const path in values[i].InnerTree) {
+      const branch = values[i].InnerTree[path]
+      // ...and for each branch...
+      for( let j = 0; j < branch.length; j ++) {
+        // ...load rhino geometry into doc
+        const rhinoObject = decodeItem(branch[j])
+        if (rhinoObject !== null) {
+          doc.objects().add(rhinoObject, null)
+        }
+      }
+    }
+  }
+
+  if (doc.objects().count < 1) {
+    console.error('No rhino objects to load!')
+    showSpinner(false)
+    return
+  }
+
+  // load rhino doc into three.js scene
+  const buffer = new Uint8Array(doc.toByteArray()).buffer
+  loader.parse( buffer, function ( object ) 
+  {
+      // debug 
+      
+      object.traverse(child => {
+        if (child.material)
+          child.material = new THREE.MeshNormalMaterial()
+      }, false)
+      
+
+      // clear objects from scene. do this here to avoid blink
+      scene.traverse(child => {
+          if (!child.isLight && child.name !== 'context') {
+              scene.remove(child)
+          }
+      })
+
+      // add object graph from rhino model to three.js scene
+      scene.add( object )
+
+      // hide spinner and enable download button
+      showSpinner(false)
+      //downloadButton.disabled = false
+
+      // zoom to extents
+      //zoomCameraToSelection(camera, controls, scene.children)
+  })
+}
+
+/**
+ * Shows or hides the loading spinner
+ */
+ function showSpinner(enable) {
+  if (enable)
+    document.getElementById('loader').style.display = 'block'
+  else
+    document.getElementById('loader').style.display = 'none'
+}
+
+/**
+ * Attempt to decode data tree item to rhino geometry
+ */
+ function decodeItem(item) {
+  const data = JSON.parse(item.data)
+  if (item.type === 'System.String') {
+    // hack for draco meshes
+    try {
+        return rhino.DracoCompression.decompressBase64String(data)
+    } catch {} // ignore errors (maybe the string was just a string...)
+  } else if (typeof data === 'object') {
+    return rhino.CommonObject.decode(data)
+  }
+  return null
+}
+
+/**
  * Called when a slider value changes in the UI. Collect all of the
  * slider values and call compute to solve for a new scene
  */
 function onSliderChange () {
   // show spinner
-  document.getElementById('loader').style.display = 'block'
+  showSpinner(true)
   compute()
 }
 
@@ -164,19 +265,4 @@ function onWindowResize() {
   camera.updateProjectionMatrix()
   renderer.setSize( window.innerWidth, window.innerHeight )
   animate()
-}
-
-function replaceCurrentMesh (threeMesh) {
-  if (_threeMesh) {
-    scene.remove(_threeMesh)
-    _threeMesh.geometry.dispose()
-  }
-  _threeMesh = threeMesh
-  scene.add(_threeMesh)
-}
-
-function meshToThreejs (mesh, material) {
-  let loader = new THREE.BufferGeometryLoader()
-  var geometry = loader.parse(mesh.toThreejsJSON())
-  return new THREE.Mesh(geometry, material)
 }

@@ -73,7 +73,8 @@ async function compute(){
 
     // hide spinner
     document.getElementById('loader').style.display = 'none'
-    let data = JSON.parse(responseJson.values[0].InnerTree['{ 0; }'][0].data)
+    //console.log(responseJson.values[0])
+    let data = JSON.parse(responseJson.values[0].InnerTree['{0}'][0].data)
     let mesh = rhino.DracoCompression.decompressBase64String(data)
       
     t1 = performance.now()

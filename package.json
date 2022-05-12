@@ -31,7 +31,7 @@
   "license": "MIT",
   "preferGlobal": true,
   "engines": {
-    "node": ">=12.22.x"
+    "node": "16.x"
   },
   "main": "./bin/www",
   "bin": {

@@ -1,8 +1,13 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { Rhino3dmLoader } from 'three/examples/jsm/loaders/3DMLoader'
-import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@7.14.0/rhino3dm.module.js'
-import { RhinoCompute } from 'https://cdn.jsdelivr.net/npm/compute-rhino3d@0.13.0-beta/compute.rhino3d.module.js'
+import rhino3dm from 'rhino3dm'
+
+//console.log(await import.meta.resolve('rhino3dm'))
+
+// set up loader for converting the results to threejs
+const loader = new Rhino3dmLoader()
+loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@7.14.0/' )
 
 let data = {}
 data.definition = 'SampleGHConvertTo3dm.gh'
@@ -122,10 +127,6 @@ async function compute() {
 
   // load rhino doc into three.js scene
   const buffer = new Uint8Array(doc.toByteArray()).buffer
-
-  // set up loader for converting the results to threejs
-  const loader = new Rhino3dmLoader()
-  loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@7.14.0/' )
 
   loader.parse( buffer, function ( object ) 
   {

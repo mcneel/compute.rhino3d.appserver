@@ -1,7 +1,12 @@
 /* eslint no-undef: "off", no-unused-vars: "off" */
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124.0/build/three.module.js'
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/controls/OrbitControls.js'
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.126.0/build/three.module.js'
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.126.0/examples/jsm/controls/OrbitControls.js'
+import { Rhino3dmLoader } from 'https://cdn.jsdelivr.net/npm/three@0.126.0/examples/jsm/loaders/3DMLoader.js'
 import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/rhino3dm.module.js'
+
+// set up loader for converting the results to threejs
+const loader = new Rhino3dmLoader()
+loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
 
 const definition = 'srf_kmeans.gh'
 
@@ -67,9 +72,7 @@ async function compute(){
 
     // Request finished. Do processing here.
 
-    // hide spinner
-    document.getElementById('loader').style.display = 'none'
-
+    /*
     // process mesh
     let mesh_data = JSON.parse(responseJson.values[0].InnerTree['{0}'][0].data)
     let mesh = rhino.CommonObject.decode(mesh_data)
@@ -80,7 +83,7 @@ async function compute(){
     let threeMesh = meshToThreejs(mesh, _threeMaterial)
     mesh.delete()
     replaceCurrentMesh(threeMesh)
-
+*/
     //process data
     //console.log(responseJson.values[1])
     let cluster_data = responseJson.values[1].InnerTree['{0;0}'].map(d=>d.data)
@@ -190,4 +193,102 @@ function meshToThreejs (mesh, material) {
   let loader = new THREE.BufferGeometryLoader()
   var geometry = loader.parse(mesh.toThreejsJSON())
   return new THREE.Mesh(geometry, material)
+}
+
+/**
+ * Parse response
+ */
+ function collectResults(responseJson) {
+
+  const values = responseJson.values
+
+  // clear doc
+  if( doc !== undefined)
+      doc.delete()
+
+  //console.log(values)
+  doc = new rhino.File3dm()
+
+  // for each output (RH_OUT:*)...
+  for ( let i = 0; i < values.length; i ++ ) {
+    // ...iterate through data tree structure...
+    for (const path in values[i].InnerTree) {
+      const branch = values[i].InnerTree[path]
+      // ...and for each branch...
+      for( let j = 0; j < branch.length; j ++) {
+        // ...load rhino geometry into doc
+        const rhinoObject = decodeItem(branch[j])
+        if (rhinoObject !== null) {
+          doc.objects().add(rhinoObject, null)
+        }
+      }
+    }
+  }
+
+  if (doc.objects().count < 1) {
+    console.error('No rhino objects to load!')
+    showSpinner(false)
+    return
+  }
+
+  // hack (https://github.com/mcneel/rhino3dm/issues/353)
+  const sphereAttrs = new rhino.ObjectAttributes()
+  sphereAttrs.mode = rhino.ObjectMode.Hidden
+  doc.objects().addSphere(new rhino.Sphere([0,0,0], 0.001), sphereAttrs)
+
+  // load rhino doc into three.js scene
+  const buffer = new Uint8Array(doc.toByteArray()).buffer
+  loader.parse( buffer, function ( object ) 
+  {
+      // debug 
+      /*
+      object.traverse(child => {
+        if (child.material !== undefined)
+          child.material = new THREE.MeshNormalMaterial()
+      }, false)
+      */
+
+      // clear objects from scene. do this here to avoid blink
+      scene.traverse(child => {
+          if (!child.isLight && child.name !== 'context') {
+              scene.remove(child)
+          }
+      })
+
+      // add object graph from rhino model to three.js scene
+      scene.add( object )
+
+      // hide spinner and enable download button
+      showSpinner(false)
+      downloadButton.disabled = false
+
+      // zoom to extents
+      zoomCameraToSelection(camera, controls, scene.children)
+  })
+}
+
+/**
+* Attempt to decode data tree item to rhino geometry
+*/
+function decodeItem(item) {
+const data = JSON.parse(item.data)
+if (item.type === 'System.String') {
+  // hack for draco meshes
+  try {
+      return rhino.DracoCompression.decompressBase64String(data)
+  } catch {} // ignore errors (maybe the string was just a string...)
+} else if (typeof data === 'object') {
+  return rhino.CommonObject.decode(data)
+}
+return null
+}
+
+/**
+ * Shows or hides the loading spinner
+ */
+ function showSpinner(enable) {
+  if (enable)
+    document.getElementById('loader').style.display = 'block'
+  else
+    document.getElementById('loader').style.display = 'none'
 }

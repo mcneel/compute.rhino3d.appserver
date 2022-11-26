@@ -63,6 +63,8 @@ async function compute(){
 
   try {
     const response = await fetch('/solve', request)
+    console.log('Sript line 66');
+    console.log(JSON.stringify(request));
 
     if(!response.ok)
       throw new Error(response.statusText)

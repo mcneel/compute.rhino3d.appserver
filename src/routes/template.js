@@ -77,6 +77,11 @@ router.get('/:name', async (req, res, next) => {
         if (input.minimum !== undefined && input.minimum !== null
             && input.maximum !== undefined && input.maximum !== null)
         {
+
+          let step = 1
+          if( ( input.maximum - input.minimum ) < 1 ) {
+            step = 0.1
+          }
           // use range input if min and max set
           view.inputs.push({
             name: name,
@@ -85,7 +90,7 @@ router.get('/:name', async (req, res, next) => {
               min: input.minimum,
               max: input.maximum,
               value: input.default,
-              step: 1
+              step: step
             }
           })
         } else {

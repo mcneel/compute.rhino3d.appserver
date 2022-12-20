@@ -53,11 +53,22 @@ async function getParams(definitionUrl) {
   result = camelcaseKeys(result, {deep: true})
 
   let inputs = result.inputs === undefined ? result.inputNames : result.inputs
+  
   let outputs = result.outputs === undefined ? result.outputNames: result.outputs
 
   const description = result.description === undefined ? '' : result.description
 
-  return { description, inputs, outputs }
+  let view = true
+
+  inputs.forEach( i => {
+    if (  i.paramType === 'Geometry' ||
+          i.paramType === 'Point' ||
+          i.paramType === 'Curve' ) {
+            view = false
+          }
+  } )
+
+  return { description, inputs, outputs, view }
 }
 
 module.exports = { registerDefinitions, getParams }

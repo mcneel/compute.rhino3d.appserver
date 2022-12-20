@@ -1,12 +1,12 @@
 /* eslint no-undef: "off", no-unused-vars: "off" */
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.126.0/build/three.module.js'
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.126.0/examples/jsm/controls/OrbitControls.js'
-import { Rhino3dmLoader } from 'https://cdn.jsdelivr.net/npm/three@0.126.0/examples/jsm/loaders/3DMLoader.js'
-import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/rhino3dm.module.js'
+import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { Rhino3dmLoader } from 'three/examples/jsm/loaders/3DMLoader'
+import rhino3dm from 'rhino3dm'
 
 // set up loader for converting the results to threejs
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
+loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0-beta/' )
 
 const definition = 'srf_kmeans.gh'
 
@@ -27,7 +27,7 @@ const y_slider = document.getElementById( 'y' )
 y_slider.addEventListener( 'mouseup', onSliderChange, false )
 y_slider.addEventListener( 'touchend', onSliderChange, false )
 
-let _threeMesh, _threeMaterial, rhino
+let _threeMesh, _threeMaterial, rhino, doc
 
 rhino3dm().then(async m => {
   console.log('Loaded rhino3dm.')
@@ -69,7 +69,7 @@ async function compute(){
       throw new Error(response.statusText)
 
     const responseJson = await response.json()
-
+  
     // Request finished. Do processing here.
 
     /*
@@ -85,7 +85,12 @@ async function compute(){
     replaceCurrentMesh(threeMesh)
 */
     //process data
-    //console.log(responseJson.values[1])
+    console.log(responseJson.values)
+
+    const rhinoObject = decodeItem(responseJson.values[0].InnerTree['{0}'][0])
+    console.log(rhinoObject)
+    
+
     let cluster_data = responseJson.values[1].InnerTree['{0;0}'].map(d=>d.data)
     console.log(cluster_data)
 

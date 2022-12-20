@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <link rel="icon" href="data:,">
-        <title>{{name}}</title>
+        <title>beam_mod.gh</title>
         <style>
             body {
                 margin: 0;
@@ -37,22 +37,20 @@
         <div id="loader"></div> 
         <div id="container">
             <div id="overlay">
-                {{#each inputs}}
                 <div>
-                  <label for="{{id}}">{{name}}</label>
-                  {{#number}}
-                  <input type="number" id="{{../id}}" value="{{value}}">
-                  {{/number}}
-                  {{#range}}
-                  <input type="range" id="{{../id}}" min="{{min}}" max="{{max}}" value="{{value}}" step="{{step}}">
-                  {{/range}}
-                  {{#bool}}
-                  <input type="checkbox" id="{{../id}}" {{#value}}checked{{/value}}>
-                  {{/bool}}
+                  <label for="Length">Length</label>
+                  <input type="range" id="Length" min="0" max="20" value="20" step="1">
                 </div>
-                {{/each}}
+                <div>
+                  <label for="Position">Position</label>
+                  <input type="range" id="Position" min="0.01" max="0.99" value="0.99" step="0.1">
+                </div>
+                <div>
+                  <label for="Toggle">Toggle</label>
+                  <input type="checkbox" id="Toggle" >
+                </div>
                 <div><button id="downloadButton" disabled>Download</button></div>
-                <div><a href="{{name}}" download="{{name}}.html">Save source code</a></div>
+                <div><a href="beam_mod.gh" download="beam_mod.gh.html">Save source code</a></div>
             </div>
         </div>
         <!-- Import maps polyfill -->
@@ -84,7 +82,7 @@ loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/' )
 
 // initialise 'data' object that will be used by compute()
 const data = {
-  definition: '{{name}}',
+  definition: 'beam_mod.gh',
   inputs: getInputs()
 }
 
@@ -269,7 +267,7 @@ function collectResults(responseJson) {
         downloadButton.disabled = false
 
         // zoom to extents
-        zoomCameraToSelection(camera, controls, scene.children)
+        //zoomCameraToSelection(camera, controls, scene.children)
     })
 }
 

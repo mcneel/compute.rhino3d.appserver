@@ -47,8 +47,8 @@
 <!-- /////////////////////////////////////////////////////////////////////////// -->
                 <div><h2>Bendy</h2></div>
                 <div>
-                  <label for="RH_IN:iterations">RH_IN:iterations</label>
-                  <input type="range" id="RH_IN:iterations" min="0" max="1000" value="1000" step="1">
+                  <label for="iterations">iterations</label>
+                  <input type="range" id="iterations" min="0" max="1000" value="1000" step="1">
                 </div>
                 <div><button id="downloadButton" disabled>Download</button></div>
                 <!-- <div><a href="_Bending_gridshell.gh" download="_Bending_gridshell.gh.html">Save source code</a></div> -->
@@ -56,15 +56,29 @@
             </div>
         </div>
 
+        <!-- Import maps polyfill -->
+        <!-- Remove this when import maps will be widely supported -->
+        <script async src="https://unpkg.com/es-module-shims@1.6.2/dist/es-module-shims.js"></script>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.147.0/build/three.module.js",
+                    "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.147.0/examples/jsm/controls/OrbitControls.js",
+                    "three/examples/jsm/loaders/3DMLoader": "https://unpkg.com/three@0.147.0/examples/jsm/loaders/3DMLoader.js",
+                    "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/rhino3dm.module.js"
+                }
+            }
+        </script>
+
         <script type="module">
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { Rhino3dmLoader } from 'three/examples/jsm/loaders/3DMLoader'
-import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@7.14.0/rhino3dm.module.js'
+import rhino3dm from 'rhino3dm'
 
 // set up loader for converting the results to threejs
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@7.14.0/rhino3dm.module.js' )
+loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/' )
 
 // initialise 'data' object that will be used by compute()
 const data = {
@@ -115,6 +129,7 @@ function getInputs() {
         break
     }
   }
+  console.log(inputs)
   return inputs
 }
 
@@ -166,6 +181,7 @@ function loadContext() {
     object.traverse(child => {
       child.name = 'context'
     })
+    console.log(object)
     scene.add(object)
   })
 }
@@ -176,9 +192,10 @@ function loadContext() {
 async function compute() {
   // construct url for GET /solve/definition.gh?name=value(&...)
   const url = new URL('/solve/' + data.definition, window.location.origin)
+  console.log(url)
   Object.keys(data.inputs).forEach(key => url.searchParams.append(key, data.inputs[key]))
   console.log(url.toString())
-  
+
   try {
     const response = await fetch(url)
   
@@ -188,6 +205,7 @@ async function compute() {
     }
 
     const responseJson = await response.json()
+    console.log(responseJson)
 
     collectResults(responseJson)
 
@@ -278,7 +296,14 @@ function decodeItem(item) {
     try {
         return rhino.DracoCompression.decompressBase64String(data)
     } catch {} // ignore errors (maybe the string was just a string...)
+  } else if (item.type == 'Rhino.Geometry.Line') {
+
+    return new rhino.LineCurve( [data.From.X, data.From.Y, data.From.Z], [data.To.X, data.To.Y, data.To.Z])
+
+    //return rhino.CommonObject.decode(item)
+
   } else if (typeof data === 'object') {
+
     return rhino.CommonObject.decode(data)
   }
   return null

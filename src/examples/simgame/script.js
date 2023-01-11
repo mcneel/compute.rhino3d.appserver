@@ -51,7 +51,8 @@ async function compute(){
     'RH_IN:window3': window3_slider.valueAsNumber,
   }
 
-  console.log(data.inputs)
+  console.log(data)
+  //console.log(data.inputs)
 
   const request = {
     'method':'POST',
@@ -101,7 +102,7 @@ async function compute(){
 
     //console.group(`[call compute and rebuild scene] = ${Math.round(t1-timeComputeStart)} ms`)
     //console.log(`[call compute and rebuild scene] = ${Math.round(t1-timeComputeStart)} ms`)
-    console.log(`  ${Math.round(computeSolveTime)} ms: appserver request`)
+    console.log(` ${Math.round(computeSolveTime)} ms: appserver request`)
     /*
     let timings = headers.split(',')
     let sum = 0
@@ -134,12 +135,12 @@ async function compute(){
  function collectResults(responseJson) {
 
   const values = responseJson.values
-
+  console.log(values)
   // clear doc
   if( doc !== undefined)
       doc.delete()
 
-  //console.log(values)
+  
   doc = new rhino.File3dm()
 
   // for each output (RH_OUT:*)...
@@ -152,39 +153,79 @@ async function compute(){
         // ...load rhino geometry into doc
         const rhinoObject = decodeItem(branch[j])
         if (rhinoObject !== null) {
-          doc.objects().add(rhinoObject, null)
+          const objAttributes = new rhino.ObjectAttributes()
+          objAttributes.name = values[i]["ParamName"]
+          doc.objects().add(rhinoObject, objAttributes)
         }
       }
     }
   }
 
+
+/*
   if (doc.objects().count < 1) {
     console.error('No rhino objects to load!')
     showSpinner(false)
     return
   }
+*/
+
+
+//Three.js material definitions for Simulation Game model
+var mat_wall_transparent = new THREE.MeshPhongMaterial( { color: "white", transparent:true, opacity: 0.2 } );
+var mat_wall_solid = new THREE.MeshPhongMaterial( { color: "white" } );
+var mat_floor = new THREE.MeshPhongMaterial( { color: "white" } );
+var mat_window_glass = new THREE.MeshPhongMaterial( { color: "white", transparent:true, opacity: 0.2 } );
+var mat_window_frame = new THREE.MeshPhongMaterial( { color: "blue" } );
+var mat_window_wall = new THREE.MeshPhongMaterial( { color: "white", transparent:true, opacity: 0.5 } );
+var mat_desk_screen = new THREE.MeshPhongMaterial( { color: "white" } );
+var mat_desk_plastic = new THREE.MeshPhongMaterial( { color: "blue" } );
+var mat_desk_desktop = new THREE.MeshPhongMaterial( { color: "blue" } );
+var mat_desk_fabric = new THREE.MeshPhongMaterial( { color: "blue" } );
+var mat_desk_legs = new THREE.MeshPhongMaterial( { color: "blue" } );
+var mat_desk_keyboard = new THREE.MeshPhongMaterial( { color: new THREE.Color( 0xff4444 ) } );
+var mat_undefined = new THREE.MeshPhongMaterial( { color: new THREE.Color( 0xff0000 ) } );
 
   // load rhino doc into three.js scene
   const buffer = new Uint8Array(doc.toByteArray()).buffer
   loader.parse( buffer, function ( object ) 
   {
-      // debug 
-      
-      object.traverse(child => {
-        if (child.material)
-          child.material = new THREE.MeshNormalMaterial()
-      }, false)
-      
-
-      // clear objects from scene. do this here to avoid blink
-      scene.traverse(child => {
-          if (!child.isLight && child.name !== 'context') {
-              scene.remove(child)
-          }
-      })
+      //add material to resulting meshes
+      object.traverse( child => {
+        if (child.name == 'RH_OUT:walls_ext_active'){
+          child.material = (mat_wall_transparent)}
+        else if (child.name == 'RH_OUT:walls_ext_inactive'){
+          child.material = (mat_wall_solid)}
+        else if (child.name == 'RH_OUT:floor'){
+          child.material = (mat_floor)}
+        else if (child.name == 'RH_OUT:window_frame'){
+          child.material = (mat_window_frame)}
+        else if (child.name == 'RH_OUT:window_wall'){
+          child.material = (mat_window_wall)}
+        else if (child.name == 'RH_OUT:window_glass'){
+          child.material = (mat_window_glass)}
+        else if (child.name == 'RH_OUT:desk_screen'){
+          child.material = (mat_desk_screen)}
+        else if (child.name == 'RH_OUT:desk_plastic'){
+          child.material = (mat_desk_plastic)}
+        else if (child.name == 'RH_OUT:desk_desktop'){
+          child.material = (mat_desk_desktop)}
+        else if (child.name == 'RH_OUT:desk_legs_desk'){
+          child.material = (mat_desk_legs)}
+        else if (child.name == 'RH_OUT:desk_legs_chair'){
+          child.material = (mat_desk_legs)}
+        else if (child.name == 'RH_OUT:desk_fabric'){
+          child.material = (mat_desk_fabric)}
+        else if (child.name == 'RH_OUT:desk_keyboard'){
+          child.material = (mat_desk_keyboard)}
+        else {
+          child.material = (mat_undefined)
+          console.log("Assigned an undefined material!")}
+       } )
 
       // add object graph from rhino model to three.js scene
       scene.add( object )
+      //console.log(object)
 
       // hide spinner and enable download button
       showSpinner(false)
@@ -233,7 +274,7 @@ function onSliderChange () {
 
 // BOILERPLATE //
 
-var scene, camera, renderer, controls
+var scene, camera, renderer, controls, directional_light
 
 function init () {
   // Rhino models are z-up, so set this as the default
@@ -242,6 +283,8 @@ function init () {
   scene = new THREE.Scene()
   scene.background = new THREE.Color(1,1,1)
   camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 )
+  directional_light = new THREE.DirectionalLight( 0xffffff, 2.5 );
+  scene.add( directional_light );
 
   renderer = new THREE.WebGLRenderer({antialias: true})
   renderer.setPixelRatio( window.devicePixelRatio )
@@ -268,4 +311,10 @@ function onWindowResize() {
   camera.updateProjectionMatrix()
   renderer.setSize( window.innerWidth, window.innerHeight )
   animate()
+}
+
+function meshToThreejs (mesh, material) {
+  const threeloader = new THREE.BufferGeometryLoader()
+  const geometry = threeloader.parse(mesh.toThreejsJSON())
+  return new THREE.Mesh(geometry, material)
 }

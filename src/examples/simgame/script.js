@@ -176,14 +176,14 @@ var mat_wall_transparent = new THREE.MeshPhongMaterial( { color: "white", transp
 var mat_wall_solid = new THREE.MeshPhongMaterial( { color: "white" } );
 var mat_floor = new THREE.MeshPhongMaterial( { color: "white" } );
 var mat_window_glass = new THREE.MeshPhongMaterial( { color: "white", transparent:true, opacity: 0.2 } );
-var mat_window_frame = new THREE.MeshPhongMaterial( { color: "blue" } );
+var mat_window_frame = new THREE.MeshPhongMaterial( { color: "gray" } );
 var mat_window_wall = new THREE.MeshPhongMaterial( { color: "white", transparent:true, opacity: 0.5 } );
-var mat_desk_screen = new THREE.MeshPhongMaterial( { color: "white" } );
-var mat_desk_plastic = new THREE.MeshPhongMaterial( { color: "blue" } );
-var mat_desk_desktop = new THREE.MeshPhongMaterial( { color: "blue" } );
-var mat_desk_fabric = new THREE.MeshPhongMaterial( { color: "blue" } );
-var mat_desk_legs = new THREE.MeshPhongMaterial( { color: "blue" } );
-var mat_desk_keyboard = new THREE.MeshPhongMaterial( { color: new THREE.Color( 0xff4444 ) } );
+var mat_desk_screen = new THREE.MeshPhongMaterial( { color: "black" } );
+var mat_desk_plastic = new THREE.MeshPhongMaterial( { color: "gray" } );
+var mat_desk_desktop = new THREE.MeshPhongMaterial( { color: "gray" } );
+var mat_desk_fabric = new THREE.MeshPhongMaterial( { color: "gray" } );
+var mat_desk_legs = new THREE.MeshPhongMaterial( { color: "gray" } );
+var mat_desk_keyboard = new THREE.MeshPhongMaterial( { color: "black" } );
 var mat_undefined = new THREE.MeshPhongMaterial( { color: new THREE.Color( 0xff0000 ) } );
 
   // load rhino doc into three.js scene
@@ -218,11 +218,22 @@ var mat_undefined = new THREE.MeshPhongMaterial( { color: new THREE.Color( 0xff0
           child.material = (mat_desk_fabric)}
         else if (child.name == 'RH_OUT:desk_keyboard'){
           child.material = (mat_desk_keyboard)}
+        else if (child.name == 'RH_OUT:grid_daylight'){
+          //pass
+        }
+        else if (child.name == 'RH_OUT:grid_glare'){
+          //pass
+        }
         else {
           child.material = (mat_undefined)
           console.log("Assigned an undefined material!")}
        } )
-
+             // clear objects from scene. do this here to avoid blink
+      scene.traverse(child => {
+        if (!child.isLight && child.name !== 'context') {
+            scene.remove(child)
+        }
+    })
       // add object graph from rhino model to three.js scene
       scene.add( object )
       //console.log(object)

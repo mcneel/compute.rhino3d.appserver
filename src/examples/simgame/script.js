@@ -10,6 +10,9 @@ loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@7.14.0/' )
 
 const definition = 'simgame.gh'
 
+
+
+
 // setup input change events
 const window1_slider = document.getElementById( 'RH_IN:window1' )
 window1_slider.addEventListener( 'mouseup', onSliderChange, false )
@@ -20,6 +23,43 @@ window2_slider.addEventListener( 'touchend', onSliderChange, false )
 const window3_slider = document.getElementById( 'RH_IN:window3' )
 window3_slider.addEventListener( 'mouseup', onSliderChange, false )
 window3_slider.addEventListener( 'touchend', onSliderChange, false )
+const GridDayLight = document.getElementById('GridDayLight')
+//________________________________________________________________________________
+GridDayLight.addEventListener('change', function(){
+  scene.traverse(function(child) {
+    if (child.name === "RH_OUT:grid_daylight") {
+        var Grid = child
+        if(GridDayLight.checked){
+          Grid.visible = true
+        }else{
+          Grid.visible = false
+        }
+    }
+  
+})
+})
+const GridGlare = document.getElementById('GridGlare')
+GridGlare.addEventListener('change', function(){
+  
+  scene.traverse(function(child) {
+    if (child.name === "RH_OUT:grid_glare") {
+        var Glare = child
+        if(GridGlare.checked){
+          
+          Glare.visible = true
+        }else{
+          Glare.visible = false
+          
+        }
+    }
+  
+})
+})
+
+const StartButton = document.getElementById('RH_IN:bool')
+StartButton.addEventListener('change', function(){
+  console.log("simulation")
+})
 
 // load the rhino3dm library
 let rhino, doc
@@ -29,6 +69,7 @@ rhino3dm().then(async m => {
 
   init()
   compute()
+  
 })
 
 
@@ -49,6 +90,8 @@ async function compute(){
     'RH_IN:window1': window1_slider.valueAsNumber,
     'RH_IN:window2': window2_slider.valueAsNumber,
     'RH_IN:window3': window3_slider.valueAsNumber,
+    'RH_IN:bool': StartButton.checked
+
   }
 
   console.log(data)
@@ -171,20 +214,60 @@ async function compute(){
 */
 
 
+ /**
+ * Update all materials
+ */
+ const updateAllMaterials = () =>
+ {
+   var i = 0;
+     scene.traverse((child) =>
+     {
+         if( child.material instanceof THREE.MeshStandardMaterial)
+         {
+             // chisld.material.envMap = environmentMap
+             child.material.envMapIntensity = 8
+             child.castShadow = true
+             child.receiveShadow = true
+             i = i + 1;
+         }
+         
+     })
+     console.log("materiasl all updated " + i)
+ }
+
+
+
 //Three.js material definitions for Simulation Game model
-var mat_wall_transparent = new THREE.MeshPhongMaterial( { color: "white", transparent:true, opacity: 0.2 } );
-var mat_wall_solid = new THREE.MeshPhongMaterial( { color: "white" } );
-var mat_floor = new THREE.MeshPhongMaterial( { color: "white" } );
-var mat_window_glass = new THREE.MeshPhongMaterial( { color: "white", transparent:true, opacity: 0.2 } );
-var mat_window_frame = new THREE.MeshPhongMaterial( { color: "gray" } );
-var mat_window_wall = new THREE.MeshPhongMaterial( { color: "white", transparent:true, opacity: 0.5 } );
-var mat_desk_screen = new THREE.MeshPhongMaterial( { color: "black" } );
-var mat_desk_plastic = new THREE.MeshPhongMaterial( { color: "gray" } );
-var mat_desk_desktop = new THREE.MeshPhongMaterial( { color: "gray" } );
-var mat_desk_fabric = new THREE.MeshPhongMaterial( { color: "gray" } );
-var mat_desk_legs = new THREE.MeshPhongMaterial( { color: "gray" } );
-var mat_desk_keyboard = new THREE.MeshPhongMaterial( { color: "black" } );
-var mat_undefined = new THREE.MeshPhongMaterial( { color: new THREE.Color( 0xff0000 ) } );
+var mat_wall_transparent = new THREE.MeshStandardMaterial( { color: "white", transparent:true, opacity: 0.2 } );
+var mat_wall_solid = new THREE.MeshStandardMaterial( { color: "white" } );
+var mat_floor = new THREE.MeshStandardMaterial( { color: "white" } );
+var mat_window_glass = new THREE.MeshStandardMaterial( { color: "white", transparent:true, opacity: 0.2 } );
+var mat_window_frame = new THREE.MeshStandardMaterial( { color: "gray" } );
+var mat_window_wall = new THREE.MeshStandardMaterial( { color: "white", transparent:true, opacity: 0.5 } );
+var mat_desk_screen = new THREE.MeshStandardMaterial( { color: "black" } );
+var mat_desk_plastic = new THREE.MeshStandardMaterial( { color: "gray" } );
+var mat_desk_desktop = new THREE.MeshStandardMaterial( { color: "gray" } );
+var mat_desk_fabric = new THREE.MeshStandardMaterial( { color: "gray" } );
+var mat_desk_legs = new THREE.MeshStandardMaterial( { color: "gray" } );
+var mat_desk_keyboard = new THREE.MeshStandardMaterial( { color: "black" } );
+var mat_undefined = new THREE.MeshStandardMaterial( { color: new THREE.Color( 0xff0000 ) } );
+var grid = new THREE.MeshStandardMaterial({vertexColors: true, opacity: 0.55, transparent: true, depthTest: false});
+var glare = new THREE.MeshStandardMaterial({vertexColors: true, opacity: 0.55, transparent: true, depthTest: false});
+
+// var mat_wall_transparent = new THREE.MeshPhongMaterial( { color: "white", transparent:true, opacity: 0.2 } );
+// var mat_wall_solid = new THREE.MeshPhongMaterial( { color: "white" } );
+// var mat_floor = new THREE.MeshPhongMaterial( { color: "white" } );
+// var mat_window_glass = new THREE.MeshPhongMaterial( { color: "white", transparent:true, opacity: 0.2 } );
+// var mat_window_frame = new THREE.MeshPhongMaterial( { color: "gray" } );
+// var mat_window_wall = new THREE.MeshPhongMaterial( { color: "white", transparent:true, opacity: 0.5 } );
+// var mat_desk_screen = new THREE.MeshPhongMaterial( { color: "black" } );
+// var mat_desk_plastic = new THREE.MeshPhongMaterial( { color: "gray" } );
+// var mat_desk_desktop = new THREE.MeshPhongMaterial( { color: "gray" } );
+// var mat_desk_fabric = new THREE.MeshPhongMaterial( { color: "gray" } );
+// var mat_desk_legs = new THREE.MeshPhongMaterial( { color: "gray" } );
+// var mat_desk_keyboard = new THREE.MeshPhongMaterial( { color: "black" } );
+// var mat_undefined = new THREE.MeshPhongMaterial( { color: new THREE.Color( 0xff0000 ) } );
+// var grid = new THREE.MeshStandardMaterial({vertexColors: true, opacity: 0.1});
 
   // load rhino doc into three.js scene
   const buffer = new Uint8Array(doc.toByteArray()).buffer
@@ -220,9 +303,15 @@ var mat_undefined = new THREE.MeshPhongMaterial( { color: new THREE.Color( 0xff0
           child.material = (mat_desk_keyboard)}
         else if (child.name == 'RH_OUT:grid_daylight'){
           //pass
+          // var gridColor = child.getObjectByName('RH_OUT:grid_daylight').material.color;
+          // child.material = (grid);
+          // grid.color.setRGB(r:12,g:23,b:33);
+          child.material = (grid)
         }
         else if (child.name == 'RH_OUT:grid_glare'){
           //pass
+          child.material = (glare);
+          child.visible = false;
         }
         else {
           child.material = (mat_undefined)
@@ -244,6 +333,16 @@ var mat_undefined = new THREE.MeshPhongMaterial( { color: new THREE.Color( 0xff0
 
       // zoom to extents
       //zoomCameraToSelection(camera, controls, scene.children)
+
+
+
+
+
+      updateAllMaterials();
+
+
+
+
   })
 }
 
@@ -290,23 +389,59 @@ var scene, camera, renderer, controls, directional_light
 function init () {
   // Rhino models are z-up, so set this as the default
   THREE.Object3D.DefaultUp = new THREE.Vector3( 0, 0, 1 );
-
+  //Scene
   scene = new THREE.Scene()
-  scene.background = new THREE.Color(1,1,1)
+  scene.background = new THREE.Color(0x95ECFA)
+
+
+
+
+
   camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 1, 1000 )
-  directional_light = new THREE.DirectionalLight( 0xffffff, 2.5 );
-  scene.add( directional_light );
+
+  //environmentlight
+
+  const cubeTextureLoader = new THREE.CubeTextureLoader()
+
+ 
+
+
+/**
+ * Environment map
+ */
+const environmentMap = cubeTextureLoader.load([
+  'assets/1/px.jpg',
+  'assets/1/nx.jpg',
+  'assets/1/py.jpg',
+  'assets/1/ny.jpg',
+  'assets/1/pz.jpg',
+  'assets/1/nz.jpg'
+])
+
+
+environmentMap.encoding = THREE.sRGBEncoding
+scene.environment = environmentMap
+
+
+
+  //
+  //directional_light = new THREE.DirectionalLight( 0xffffff, 2.5 );
+  //scene.add( directional_light );
 
   renderer = new THREE.WebGLRenderer({antialias: true})
   renderer.setPixelRatio( window.devicePixelRatio )
   renderer.setSize( window.innerWidth, window.innerHeight )
   document.body.appendChild(renderer.domElement)
+  console.log(scene)
 
   controls = new OrbitControls( camera, renderer.domElement  )
+  controls.enableDamping = true
+ 
 
   camera.position.z = 50
 
   window.addEventListener( 'resize', onWindowResize, false )
+ 
 
   animate()
 }
@@ -315,6 +450,7 @@ var animate = function () {
   requestAnimationFrame( animate )
   controls.update()
   renderer.render( scene, camera )
+  
 }
   
 function onWindowResize() {

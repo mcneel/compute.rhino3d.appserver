@@ -57,7 +57,7 @@ GridGlare.addEventListener('change', function(){
 })
 
 const StartButton = document.getElementById('RH_IN:bool')
-StartButton.addEventListener('change', function(){
+StartButton.addEventListener('change', onSliderChange, function(){
   console.log("simulation")
 })
 
@@ -194,7 +194,9 @@ async function compute(){
       // ...and for each branch...
       for( let j = 0; j < branch.length; j ++) {
         // ...load rhino geometry into doc
+        
         const rhinoObject = decodeItem(branch[j])
+        console.log(branch[j])
         if (rhinoObject !== null) {
           const objAttributes = new rhino.ObjectAttributes()
           objAttributes.name = values[i]["ParamName"]
@@ -253,6 +255,7 @@ var mat_desk_keyboard = new THREE.MeshStandardMaterial( { color: "black" } );
 var mat_undefined = new THREE.MeshStandardMaterial( { color: new THREE.Color( 0xff0000 ) } );
 var grid = new THREE.MeshStandardMaterial({vertexColors: true, opacity: 0.55, transparent: true, depthTest: false});
 var glare = new THREE.MeshStandardMaterial({vertexColors: true, opacity: 0.55, transparent: true, depthTest: false});
+var text = new THREE.MeshStandardMaterial( { color: "blue" } );
 
 // var mat_wall_transparent = new THREE.MeshPhongMaterial( { color: "white", transparent:true, opacity: 0.2 } );
 // var mat_wall_solid = new THREE.MeshPhongMaterial( { color: "white" } );
@@ -312,8 +315,9 @@ var glare = new THREE.MeshStandardMaterial({vertexColors: true, opacity: 0.55, t
           //pass
           child.material = (glare);
           child.visible = false;
-        }
-        else {
+        }else if (child.name == 'RH_OUT:text'){
+          child.material = (text);
+        }else {
           child.material = (mat_undefined)
           console.log("Assigned an undefined material!")}
        } )

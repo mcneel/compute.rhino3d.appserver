@@ -10,13 +10,6 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/> 
         <title>Simulation Game MVP</title>
         <style>
-            /* body { margin: 0; }
-            canvas { width: 100%; height: 100%; }
-            input {width: 90%;}
-            #container {position: relative;}
-            #container canvas, #overlay { position: absolute;}
-            #overlay {z-index: 1; width: 100%} */
-
             #loader {
                 border: 5px solid #92c1ff; /* Light grey */
                 border-top: 5px solid #100827; /* Grey */
@@ -35,17 +28,83 @@
                 100% { transform: rotate(360deg); }
             }
         </style>
+        <script src="ExtraStyling.js" defer></script>
     </head>
     <body>
         <div id="loader" class="loader"></div> 
-        <nav>
+        <nav >
             <input type="checkbox" id="check">
+
             <label for="check" class="checkbtn">
               <i class="fas fa-bars"></i>
             </label>
+
+
             <label class="logo">Simulation Game MVP</label>
+
+            
+            
             <ul class="mainMenu">
-              <li class="menu-item"><a class="active" href="#">Przykłady</a></li>
+                <li class="tekst">Przykład:</li>
+                <li class="custom-select">
+                <select name="Rooms" id="RH_IN:RoomNumber">
+                    <option value="1">1</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+
+                  </select>
+                </li>
+
+                <!-- <input type="range" id="RH_IN:RoomNumber" name="RH_IN:RoomNumber" min="0" max="20" value="1" step="1" class="slider"> -->
+
+              <!-- <li class="menu-item"><a class="active" href="#">Przykłady</a></li> -->
+              <!-- <li class="dropdown" data-dropdown>
+                <button class="link">Przykłady</button>
+                <div class="dropdown-menu" data-dropdown-button>
+                    Dropdown content
+                </div>
+            </li> -->
+
+
+            <!-- <li class="dropdown" data-dropdown>
+                <button class="link" data-dropdown-button>Information</button>
+                <div class="dropdown-menu information-grid">
+                  <div>
+                    <div class="dropdown-heading">Free Tutorials</div>
+                    <div class="dropdown-links">
+                      <a href="#" class="link">All</a>
+                      <a href="#" class="link">Latest</a>
+                      <a href="#" class="link">Popular</a>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="dropdown-heading">Courses</div>
+                    <div class="dropdown-links">
+                      <a href="#" class="link">JavaScript</a>
+                      <a href="#" class="link">CSS</a>
+                      <a href="#" class="link">React</a>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="dropdown-heading">Blog</div>
+                    <div class="dropdown-links">
+                      <a href="#" class="link">All</a>
+                      <a href="#" class="link">Latest</a>
+                      <a href="#" class="link">Popular</a>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="dropdown-heading">Other</div>
+                    <div class="dropdown-links">
+                      <a href="#" class="link">Twitter</a>
+                      <a href="#" class="link">Newsletter</a>
+                      <a href="#" class="link">Discord</a>
+                    </div>
+                  </div>
+                </div>
+            </li> -->
         
             </ul>
           </nav>
@@ -81,9 +140,12 @@
                             <input type="range" id="RH_IN:window3" name="RH_IN:window3" min="0" max="20" value="5" step="1" class="slider">
                             
                         </div>
+                        
+                        </div>
+                        <div id="overlay" class="sliders-container">
                         <div>
                             <label for="GridDayLight"  class="checkbox-container"> 
-                            <input type="checkbox" id="GridDayLight" name="GridDayLight" checked class="checkbox">
+                            <input type="checkbox" id="GridDayLight" name="GridDayLight" unchecked class="checkbox">
                             Light Grid
                             
                             </label>
@@ -121,6 +183,7 @@
         <!-- Import maps polyfill -->
         <!-- Remove this when import maps will be widely supported -->
         <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+        
         <script type="importmap">
             {
                 "imports": {
@@ -132,5 +195,6 @@
         </script>
 
         <script type="module" src="./script.js"></script>
+        
     </body>
 </html>

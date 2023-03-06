@@ -27,7 +27,7 @@ const argIndex = process.argv.indexOf('--computeUrl')
 if (argIndex > -1)
   process.env.RHINO_COMPUTE_URL = process.argv[argIndex + 1]
 if (!process.env.RHINO_COMPUTE_URL)
-  process.env.RHINO_COMPUTE_URL = 'http://localhost:8081/' // default if nothing else exists
+  process.env.RHINO_COMPUTE_URL = 'http://localhost:6500/' // default if nothing else exists
 
 console.log('RHINO_COMPUTE_URL: ' + process.env.RHINO_COMPUTE_URL)
 

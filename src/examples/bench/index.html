@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="apple-touch-icon" sizes="180x180" href="../favicon/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png">
+        <link rel="manifest" href="../favicon/site.webmanifest">
+        <title>Bench</title>
+        <style>
+            body { margin: 0; }
+            canvas { width: 100%; height: 100%; }
+            input {width: 30%;}
+            #container {position: relative;}
+            #container canvas, #overlay { position: absolute;}
+            #overlay {z-index: 1; width: 40%}
+            #loader {
+                border: 5px solid #f3f3f3; /* Light grey */
+                border-top: 5px solid #3d3d3d; /* Grey */
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                animation: spin 1s linear infinite;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                z-index: 2;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
+    </head>
+    <body>
+        <div id="loader"></div> 
+        <div id="container">
+            <div id="overlay">
+                <div>
+                    <input type="range" id="Length" name="Length" min="48" max="120" value="80" step="1">
+                    <label for="Length">Length</label>
+                </div>
+                <div>
+                    <input type="range" id="Height" name="Height" min="2" max="20" value="15" step="0.01">
+                    <label for="Height">Arc Height</label>
+                </div>
+                <div>
+                    <input type="range" id="Spacing" name="Spacing" min="1" max="3" value="1.75" step="0.01">
+                    <label for="Spacing">Rib Spacing</label>
+                </div>
+                <div>
+                    <input type="range" id="Thickness" name="Thickness" min="0.5" max="3.0" value="1.25" step="0.01">
+                    <label for="Thickness">Rib Thickness</label>
+                </div>
+            </div>
+        </div>
+        <!-- Import maps polyfill -->
+        <!-- Remove this when import maps will be widely supported -->
+        <script async src="https://unpkg.com/es-module-shims@1.6.2/dist/es-module-shims.js"></script>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://unpkg.com/three@0.147.0/build/three.module.js",
+                    "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.147.0/examples/jsm/controls/OrbitControls.js",
+                    "three/examples/jsm/loaders/3DMLoader": "https://unpkg.com/three@0.147.0/examples/jsm/loaders/3DMLoader.js",
+                    "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/rhino3dm.module.js"
+                }
+            }
+        </script>
+        <script type="module" src="script.js"></script>
+    </body>
+</html>

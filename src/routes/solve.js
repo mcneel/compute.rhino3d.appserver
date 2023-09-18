@@ -182,6 +182,7 @@ function commonSolve (req, res, next){
       }
 
       res.setHeader('Server-Timing', timing)*/
+      console.log(result)
       res.send(result)
     }).catch( (error) => { 
       next(error)

@@ -6,7 +6,7 @@ import rhino3dm from 'rhino3dm'
 
 // set up loader for converting the results to threejs
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0-beta/' )
+loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta2/' )
 
 const definition = 'srf_kmeans.gh'
 
@@ -27,15 +27,13 @@ const y_slider = document.getElementById( 'y' )
 y_slider.addEventListener( 'mouseup', onSliderChange, false )
 y_slider.addEventListener( 'touchend', onSliderChange, false )
 
-let _threeMesh, _threeMaterial, rhino, doc
+let _threeMesh, _threeMaterial, doc
 
-rhino3dm().then(async m => {
-  console.log('Loaded rhino3dm.')
-  rhino = m // global
+const rhino = await rhino3dm()
+console.log('Loaded rhino3dm.')
 
-  init()
-  compute()
-})
+init()
+compute()
 
 /**
  * Call appserver

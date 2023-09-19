@@ -6,7 +6,7 @@ import rhino3dm from 'rhino3dm'
 /* eslint no-undef: "off", no-unused-vars: "off" */
 
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/' )
+loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta/' )
 
 const definition = 'BranchNodeRnd.gh'
 
@@ -22,14 +22,13 @@ length_slider.addEventListener( 'mouseup', onSliderChange, false )
 length_slider.addEventListener( 'touchend', onSliderChange, false )
 
 // load the rhino3dm library
-let rhino, doc
-rhino3dm().then(async m => {
-  console.log('Loaded rhino3dm.')
-  rhino = m // global
+let doc
 
-  init()
-  compute()
-})
+const rhino = await rhino3dm()
+console.log('Loaded rhino3dm.')
+
+init()
+compute()
 
 
 
@@ -192,7 +191,9 @@ async function compute(){
 
       // zoom to extents
       //zoomCameraToSelection(camera, controls, scene.children)
-  })
+  }, (error) => {
+    console.error(error)
+  }) 
 }
 
 /**
@@ -257,7 +258,7 @@ function init () {
   animate()
 }
 
-var animate = function () {
+function animate () {
   requestAnimationFrame( animate )
   controls.update()
   renderer.render( scene, camera )

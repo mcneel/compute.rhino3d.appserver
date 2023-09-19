@@ -1,12 +1,12 @@
 /* eslint no-undef: "off", no-unused-vars: "off" */
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.126.0/build/three.module.js'
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.126.0/examples/jsm/controls/OrbitControls.js'
-import { Rhino3dmLoader } from 'https://cdn.jsdelivr.net/npm/three@0.126.0/examples/jsm/loaders/3DMLoader.js'
-import rhino3dm from 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/rhino3dm.module.js'
+import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
+import { Rhino3dmLoader } from 'three/examples/jsm/loaders/3DMLoader'
+import rhino3dm from 'rhino3dm'
 
 // set up loader for converting the results to threejs
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/' )
+loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta2/' )
 
 const definition = 'docString.gh'
 
@@ -18,15 +18,14 @@ const radius_slider = document.getElementById( 'radius' )
 radius_slider.addEventListener( 'mouseup', onSliderChange, false )
 radius_slider.addEventListener( 'touchend', onSliderChange, false )
 
-let rhino, doc
+let doc
+let scene, camera, renderer, controls
 
-rhino3dm().then(async m => {
-  console.log('Loaded rhino3dm.')
-  rhino = m // global
+const rhino = await rhino3dm()
+console.log('Loaded rhino3dm.')
 
-  init()
-  compute()
-})
+init()
+compute()
 
 /**
  * Call appserver
@@ -101,7 +100,7 @@ function collectResults(responseJson) {
 
   // set up loader for converting the results to threejs
   const loader = new Rhino3dmLoader()
-  loader.setLibraryPath('https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/')
+  loader.setLibraryPath('https://unpkg.com/rhino3dm@8.0.0-beta/')
 
   // const lineMat = new THREE.LineBasicMaterial({color: new THREE.Color('black')});
   // load rhino doc into three.js scene
@@ -131,7 +130,7 @@ function collectResults(responseJson) {
     // hide spinner
     showSpinner(false)
 
-  })
+  }, (error)=>{console.error(error)})
 }
 
 /**
@@ -155,8 +154,6 @@ function onSliderChange () {
 }
 
 // BOILERPLATE //
-
-var scene, camera, renderer, controls
 
 function init () {
 
@@ -190,7 +187,7 @@ function init () {
   animate()
 }
 
-var animate = function () {
+function animate () {
   requestAnimationFrame( animate )
   renderer.render( scene, camera )
 }

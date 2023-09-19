@@ -57,16 +57,16 @@
         </div>
         <!-- Import maps polyfill -->
         <!-- Remove this when import maps will be widely supported -->
-        <script async src="https://unpkg.com/es-module-shims@1.6.2/dist/es-module-shims.js"></script>
+        <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
 
         <script type="importmap">
             {
                 "imports": {
-                    "three": "https://unpkg.com/three@0.147.0/build/three.module.js",
-                    "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.147.0/examples/jsm/controls/OrbitControls.js",
-                    "three/examples/jsm/loaders/3DMLoader": "https://cdn.jsdelivr.net/npm/three@0.147.0/examples/jsm/loaders/3DMLoader.js",
-                    "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/rhino3dm.module.js",
-                    "rhino_compute": "https://cdn.jsdelivr.net/npm/compute-rhino3d@0.13.0-beta/compute.rhino3d.module.js"
+                    "three": "https://unpkg.com/three@0.156.1/build/three.module.js",
+                    "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.156.1/examples/jsm/controls/OrbitControls.js",
+                    "three/examples/jsm/loaders/3DMLoader": "https://unpkg.com/three@0.156.1/examples/jsm/loaders/3DMLoader.js",
+                    "rhino3dm":"https://unpkg.com/rhino3dm@8.0.0-beta2/rhino3dm.module.js",
+                    "rhino_compute": "https://unpkg.com/compute-rhino3d@0.13.0-beta/compute.rhino3d.module.js"
                 }
             }
         </script>
@@ -80,7 +80,7 @@ import { RhinoCompute } from 'rhino_compute'
 
 // set up loader for converting the results to threejs
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/' )
+loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta2/' )
 
 // initialise 'data' object that will be used by compute()
 const data = {
@@ -89,14 +89,13 @@ const data = {
 }
 
 // globals
-let rhino, doc
+let doc
 
-rhino3dm().then(async m => {
-    rhino = m
+const rhino = await rhino3dm()
+console.log('Loaded rhino3dm.')
 
-    init()
-    compute()
-})
+init()
+compute()
 
 const downloadButton = document.getElementById("downloadButton")
 downloadButton.onclick = download

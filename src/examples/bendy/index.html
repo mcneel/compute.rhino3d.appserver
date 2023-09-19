@@ -58,15 +58,15 @@
 
         <!-- Import maps polyfill -->
         <!-- Remove this when import maps will be widely supported -->
-        <script async src="https://unpkg.com/es-module-shims@1.6.2/dist/es-module-shims.js"></script>
+        <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
         <script type="importmap">
             {
-                "imports": {
-                    "three": "https://unpkg.com/three@0.147.0/build/three.module.js",
-                    "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.147.0/examples/jsm/controls/OrbitControls.js",
-                    "three/examples/jsm/loaders/3DMLoader": "https://unpkg.com/three@0.147.0/examples/jsm/loaders/3DMLoader.js",
-                    "rhino3dm":"https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/rhino3dm.module.js"
-                }
+              "imports": {
+                "three": "https://unpkg.com/three@0.156.1/build/three.module.js",
+                "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.156.1/examples/jsm/controls/OrbitControls.js",
+                "three/examples/jsm/loaders/3DMLoader": "https://unpkg.com/three@0.156.1/examples/jsm/loaders/3DMLoader.js",
+                "rhino3dm":"https://unpkg.com/rhino3dm@8.0.0-beta/rhino3dm.module.js"
+              }
             }
         </script>
 
@@ -78,7 +78,7 @@ import rhino3dm from 'rhino3dm'
 
 // set up loader for converting the results to threejs
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://cdn.jsdelivr.net/npm/rhino3dm@7.15.0/' )
+loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta/' )
 
 // initialise 'data' object that will be used by compute()
 const data = {
@@ -87,15 +87,15 @@ const data = {
 }
 
 // globals
-let rhino, doc
+let doc
+let scene, camera, renderer, controls
 
-rhino3dm().then(async m => {
-    rhino = m
+const rhino = await rhino3dm()
+console.log('Loaded rhino3dm.')
 
-    init()
-    loadContext()
-    compute()
-})
+init()
+loadContext()
+compute()
 
 const downloadButton = document.getElementById("downloadButton")
 downloadButton.onclick = download
@@ -132,9 +132,6 @@ function getInputs() {
   console.log(inputs)
   return inputs
 }
-
-// more globals
-let scene, camera, renderer, controls
 
 /**
  * Sets up the scene, camera, renderer, lights and controls and starts the animation
@@ -183,7 +180,7 @@ function loadContext() {
     })
     console.log(object)
     scene.add(object)
-  })
+  }, (error) => {console.log(error)})
 }
 
 /**
@@ -283,7 +280,7 @@ function collectResults(responseJson) {
 
         // zoom to extents
         zoomCameraToSelection(camera, controls, scene.children)
-    })
+    }, (error)=>{console.log(error)})
 }
 
 /**

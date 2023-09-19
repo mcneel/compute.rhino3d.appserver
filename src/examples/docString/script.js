@@ -19,6 +19,7 @@ radius_slider.addEventListener( 'mouseup', onSliderChange, false )
 radius_slider.addEventListener( 'touchend', onSliderChange, false )
 
 let doc
+let scene, camera, renderer, controls
 
 const rhino = await rhino3dm()
 console.log('Loaded rhino3dm.')
@@ -99,7 +100,7 @@ function collectResults(responseJson) {
 
   // set up loader for converting the results to threejs
   const loader = new Rhino3dmLoader()
-  loader.setLibraryPath('https://cdn.jsdelivr.net/npm/rhino3dm@0.15.0-beta/')
+  loader.setLibraryPath('https://unpkg.com/rhino3dm@8.0.0-beta/')
 
   // const lineMat = new THREE.LineBasicMaterial({color: new THREE.Color('black')});
   // load rhino doc into three.js scene
@@ -129,7 +130,7 @@ function collectResults(responseJson) {
     // hide spinner
     showSpinner(false)
 
-  })
+  }, (error)=>{console.error(error)})
 }
 
 /**
@@ -153,8 +154,6 @@ function onSliderChange () {
 }
 
 // BOILERPLATE //
-
-var scene, camera, renderer, controls
 
 function init () {
 
@@ -188,7 +187,7 @@ function init () {
   animate()
 }
 
-var animate = function () {
+function animate () {
   requestAnimationFrame( animate )
   renderer.render( scene, camera )
 }

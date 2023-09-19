@@ -94,7 +94,7 @@ import rhino3dm from 'rhino3dm'
 
 // set up loader for converting the results to threejs
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta2/' )
+loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta/' )
 
 // initialise 'data' object that will be used by compute()
 const data = {
@@ -109,6 +109,7 @@ dropdown.onchange = onDropdownChange
 
 // globals
 let doc
+let scene, camera, renderer, controls
 
 const rhino = await rhino3dm()
 console.log('Loaded rhino3dm.')
@@ -213,9 +214,6 @@ async function updateInputs() {
   onSliderChange()
 }
 ///////////////////////////////////////////////////////////////////////////
-
-// more globals
-let scene, camera, renderer, controls
 
 /**
  * Sets up the scene, camera, renderer, lights and controls and starts the animation
@@ -352,7 +350,7 @@ function collectResults(responseJson) {
 
         // zoom to extents
         zoomCameraToSelection(camera, controls, scene.children)
-    })
+    }, (error)=>{console.error(error)})
 }
 
 /**

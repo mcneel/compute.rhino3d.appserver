@@ -7,7 +7,7 @@ import rhino3dm from 'rhino3dm'
 
 // set up loader for converting the results to threejs
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta2/' )
+loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta/' )
 
 const definition = 'metaballTable.gh'
 
@@ -206,7 +206,7 @@ async function compute () {
       showSpinner(false)
       //downloadButton.disabled = false
 
-  })
+  }, (error)=>{console.error(error)})
 }
 
 /**
@@ -273,7 +273,7 @@ function init () {
   animate()
 }
 
-var animate = function () {
+function animate () {
   requestAnimationFrame( animate )
   renderer.render( scene, camera )
 }

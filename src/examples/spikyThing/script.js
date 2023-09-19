@@ -6,7 +6,7 @@ import rhino3dm from 'rhino3dm'
 /* eslint no-undef: "off", no-unused-vars: "off" */
 
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta2/' )
+loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta/' )
 
 const definition = 'BranchNodeRnd.gh'
 
@@ -191,7 +191,9 @@ async function compute(){
 
       // zoom to extents
       //zoomCameraToSelection(camera, controls, scene.children)
-  })
+  }, (error) => {
+    console.error(error)
+  }) 
 }
 
 /**
@@ -256,7 +258,7 @@ function init () {
   animate()
 }
 
-var animate = function () {
+function animate () {
   requestAnimationFrame( animate )
   controls.update()
   renderer.render( scene, camera )

@@ -182,8 +182,10 @@ function commonSolve (req, res, next){
       }
 
       res.setHeader('Server-Timing', timing)*/
-      console.log(result)
-      res.send(result)
+      
+      const r = JSON.parse(result)
+      delete r.pointer
+      res.send(JSON.stringify(r))
     }).catch( (error) => { 
       next(error)
     })

@@ -67,7 +67,7 @@
                 "three": "https://unpkg.com/three@0.156.1/build/three.module.js",
                 "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.156.1/examples/jsm/controls/OrbitControls.js",
                 "three/examples/jsm/loaders/3DMLoader": "https://unpkg.com/three@0.156.1/examples/jsm/loaders/3DMLoader.js",
-                "rhino3dm":"https://unpkg.com/rhino3dm@8.0.0-beta2/rhino3dm.module.js"
+                "rhino3dm":"https://unpkg.com/rhino3dm@8.0.0-beta/rhino3dm.module.js"
               }
             }
         </script>
@@ -79,7 +79,7 @@ import rhino3dm from 'rhino3dm'
 
 // set up loader for converting the results to threejs
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta2/' )
+loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta/' )
 
 // initialise 'data' object that will be used by compute()
 const data = {
@@ -91,6 +91,7 @@ const data = {
 
 // globals
 let doc
+let scene, camera, renderer, controls
 
 const rhino = await rhino3dm()
 console.log('Loaded rhino3dm.')
@@ -172,8 +173,7 @@ document.getElementById('file-input')
 //   return inputs
 // }
 
-// more globals
-let scene, camera, renderer, controls
+
 
 /**
  * Sets up the scene, camera, renderer, lights and controls and starts the animation
@@ -323,7 +323,7 @@ function collectResults(responseJson) {
 
         // zoom to extents
         zoomCameraToSelection(camera, controls, scene.children)
-    })
+    },(error)=>{console.error(error)})
 }
 
 /**

@@ -6,7 +6,7 @@ import rhino3dm from 'rhino3dm'
 
 // set up loader for converting the results to threejs
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta2/' )
+loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta/' )
 
 const definition = 'srf_kmeans.gh'
 
@@ -70,23 +70,13 @@ async function compute(){
   
     // Request finished. Do processing here.
 
-    /*
     // process mesh
-    let mesh_data = JSON.parse(responseJson.values[0].InnerTree['{0}'][0].data)
-    let mesh = rhino.CommonObject.decode(mesh_data)
- 
-    if (!_threeMaterial) {
-      _threeMaterial = new THREE.MeshBasicMaterial({vertexColors:true, side:2})
-    }
-    let threeMesh = meshToThreejs(mesh, _threeMaterial)
-    mesh.delete()
-    replaceCurrentMesh(threeMesh)
-*/
-    //process data
     console.log(responseJson.values)
 
     const rhinoObject = decodeItem(responseJson.values[0].InnerTree['{0}'][0])
     console.log(rhinoObject)
+    let threeMesh = meshToThreejs(rhinoObject, new THREE.MeshBasicMaterial({vertexColors:true}))
+    replaceCurrentMesh(threeMesh)
     
 
     let cluster_data = responseJson.values[1].InnerTree['{0;0}'].map(d=>d.data)
@@ -127,6 +117,8 @@ async function compute(){
       div.style.backgroundColor = color_data[i]
       legend.appendChild(div)
     }
+
+    document.getElementById('loader').style.display = 'none'
   } catch(error){
     console.error(error)
   }
@@ -169,7 +161,7 @@ function init () {
   animate()
 }
 
-var animate = function () {
+function animate () {
   requestAnimationFrame( animate )
   controls.update()
   renderer.render( scene, camera )
@@ -234,11 +226,6 @@ function meshToThreejs (mesh, material) {
     return
   }
 
-  // hack (https://github.com/mcneel/rhino3dm/issues/353)
-  const sphereAttrs = new rhino.ObjectAttributes()
-  sphereAttrs.mode = rhino.ObjectMode.Hidden
-  doc.objects().addSphere(new rhino.Sphere([0,0,0], 0.001), sphereAttrs)
-
   // load rhino doc into three.js scene
   const buffer = new Uint8Array(doc.toByteArray()).buffer
   loader.parse( buffer, function ( object ) 
@@ -267,6 +254,8 @@ function meshToThreejs (mesh, material) {
 
       // zoom to extents
       zoomCameraToSelection(camera, controls, scene.children)
+  }, (error) => {
+    console.error(error)
   })
 }
 

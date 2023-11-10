@@ -6,7 +6,7 @@ import rhino3dm from 'rhino3dm'
 /* eslint no-undef: "off", no-unused-vars: "off" */
 
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta/' )
+loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta3/' )
 
 const definition = 'BranchNodeRnd.gh'
 
@@ -170,8 +170,9 @@ async function compute(){
       // debug 
       
       object.traverse(child => {
+        console.log(child)
         if (child.material)
-          child.material = new THREE.MeshNormalMaterial()
+          child.material = new THREE.MeshBasicMaterial( { vertexColors: true})
       }, false)
       
 

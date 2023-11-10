@@ -17,8 +17,8 @@ app.use(cors())
 app.use(compression())
 
 // Define URL for our compute server
-// - For local debugging on the same computer, compute.geometry.exe is
-//   typically running at http://localhost:8081/
+// - For local debugging on the same computer, rhino.compute.exe is
+//   typically running at http://localhost:5000/ (exe) or http://localhost:6500/ (debug)
 // - For a production environment it is good to use an environment variable
 //   named RHINO_COMPUTE_URL to define where the compute server is located
 // - And just in case, you can pass an address as a command line arg

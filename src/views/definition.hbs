@@ -62,10 +62,10 @@
         <script type="importmap">
             {
                 "imports": {
-                    "three": "https://unpkg.com/three@0.156.1/build/three.module.js",
-                    "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.156.1/examples/jsm/controls/OrbitControls.js",
-                    "three/examples/jsm/loaders/3DMLoader": "https://unpkg.com/three@0.156.1/examples/jsm/loaders/3DMLoader.js",
-                    "rhino3dm":"https://unpkg.com/rhino3dm@8.0.0-beta2/rhino3dm.module.js",
+                    "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+                    "three/examples/jsm/controls/OrbitControls": "https://unpkg.com/three@0.158.0/examples/jsm/controls/OrbitControls.js",
+                    "three/examples/jsm/loaders/3DMLoader": "https://unpkg.com/three@0.158.0/examples/jsm/loaders/3DMLoader.js",
+                    "rhino3dm":"https://unpkg.com/rhino3dm@8.0.0-beta3/rhino3dm.module.js",
                     "rhino_compute": "https://unpkg.com/compute-rhino3d@0.13.0-beta/compute.rhino3d.module.js"
                 }
             }
@@ -80,7 +80,7 @@ import { RhinoCompute } from 'rhino_compute'
 
 // set up loader for converting the results to threejs
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta2/' )
+loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta3/' )
 
 // initialise 'data' object that will be used by compute()
 const data = {
@@ -89,7 +89,7 @@ const data = {
 }
 
 // globals
-let doc
+let doc, scene, camera, renderer, controls
 
 const rhino = await rhino3dm()
 console.log('Loaded rhino3dm.')
@@ -131,9 +131,6 @@ function getInputs() {
   }
   return inputs
 }
-
-// more globals
-let scene, camera, renderer, controls
 
 /**
  * Sets up the scene, camera, renderer, lights and controls and starts the animation
@@ -225,9 +222,31 @@ function collectResults(responseJson) {
         for( let j = 0; j < branch.length; j ++) {
           // ...load rhino geometry into doc
           const rhinoObject = decodeItem(branch[j])
-          console.log(rhinoObject)
+          //console.log(rhinoObject.vertexColors().count)
           if (rhinoObject !== null) {
-            doc.objects().add(rhinoObject, null)
+
+            if( rhinoObject.constructor.name === 'File3dm' ) {
+              
+              const _doc = rhinoObject
+
+              //add objects into the main doc
+              for( let p = 0; p < _doc.objects().count; p ++ ) {
+
+                const ro = _doc.objects().get(p)
+                const geo = ro.geometry()
+                const attr = ro.attributes()
+                const matIndex = attr.materialIndex
+                const mat = _doc.materials().get(matIndex)
+                attr.materialIndex = doc.materials().count - 1 
+                doc.materials().add(mat)
+                doc.objects().add(geo, attr)
+
+              }
+              
+            } else {
+              doc.objects().add(rhinoObject, null)
+            }
+            
           }
         }
       }
@@ -280,7 +299,22 @@ function decodeItem(item) {
   if (item.type === 'System.String') {
     // hack for draco meshes
     try {
-        return rhino.DracoCompression.decompressBase64String(data)
+
+        const obj = rhino.DracoCompression.decompressBase64String(data)
+
+        if( obj === null ) {
+
+          //might be a whole doc
+
+          const arr = _base64ToArrayBuffer(data)
+          return rhino.File3dm.fromByteArray(arr)
+
+        } else {
+
+          return obj
+
+        }
+        
     } catch {} // ignore errors (maybe the string was just a string...)
   } else if (typeof data === 'object') {
     //console.log(data)
@@ -395,6 +429,17 @@ function showSpinner(enable) {
     document.getElementById('loader').style.display = 'block'
   else
     document.getElementById('loader').style.display = 'none'
+}
+
+// from https://stackoverflow.com/a/21797381
+function _base64ToArrayBuffer(base64) {
+  var binary_string = window.atob(base64);
+  var len = binary_string.length;
+  var bytes = new Uint8Array(len);
+  for (var i = 0; i < len; i++) {
+    bytes[i] = binary_string.charCodeAt(i);
+  }
+  return bytes.buffer;
 }
         </script>
     </body>

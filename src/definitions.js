@@ -48,6 +48,7 @@ async function getParams(definitionUrl) {
   }
 
   let result = await response.json()
+  console.log(result)
 
   // json returned by /io is PascalCase and looks weird in javascript
   result = camelcaseKeys(result, {deep: true})

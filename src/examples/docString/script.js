@@ -6,7 +6,7 @@ import rhino3dm from 'rhino3dm'
 
 // set up loader for converting the results to threejs
 const loader = new Rhino3dmLoader()
-loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta2/' )
+loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta3/' )
 
 const definition = 'docString.gh'
 
@@ -100,7 +100,7 @@ function collectResults(responseJson) {
 
   // set up loader for converting the results to threejs
   const loader = new Rhino3dmLoader()
-  loader.setLibraryPath('https://unpkg.com/rhino3dm@8.0.0-beta/')
+  loader.setLibraryPath('https://unpkg.com/rhino3dm@8.0.0-beta3/')
 
   // const lineMat = new THREE.LineBasicMaterial({color: new THREE.Color('black')});
   // load rhino doc into three.js scene

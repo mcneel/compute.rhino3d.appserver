@@ -40,7 +40,7 @@
   "scripts": {
     "start": "node ./src/bin/www",
     "lint": "eslint src/*.js --fix && eslint src/routes/*.js --fix && eslint src/bin/www --fix",
-    "start-args": "node ./src/bin/www --computeUrl http://localhost:8081/"
+    "start-args": "node ./src/bin/www --computeUrl http://localhost:6500/"
   },
   "dependencies": {
     "camelcase-keys": "^6.2.2",

@@ -23,8 +23,8 @@ router.get('/', async(req, res) => {
     let data
     try {
       data = await getParams(definition.path)
-      //console.log(data)
     } catch (err) {
+      console.log(err)
       next(err)
     }
     if(data.view) { view.definitions.push({ name: definition.name }) }

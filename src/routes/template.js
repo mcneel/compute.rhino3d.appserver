@@ -27,7 +27,8 @@ router.get('/', async(req, res, next) => {
       console.log(err)
       next(err)
     }
-    if(data.view) { view.definitions.push({ name: definition.name }) }
+    if(data)
+      if(data.view) { view.definitions.push({ name: definition.name }) }
     
   }
   res.render('list', view)

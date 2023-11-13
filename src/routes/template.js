@@ -14,7 +14,7 @@ const getParams = require('../definitions.js').getParams
 /**
  * Show list of available definitions
  */
-router.get('/', async(req, res) => {
+router.get('/', async(req, res, next) => {
   view = {
     definitions: []
   }

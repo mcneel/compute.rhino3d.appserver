@@ -1,6 +1,6 @@
 ## Client code
 
-Please review the [example code](/example) we include in this repository.
+Please review the (src/examples) we include in this repository.
 
 To solve a GH definition you need to pass the definition name and input values to the appserver:
 
@@ -26,6 +26,8 @@ async function compute(){
   }
 
   const url = 'https://{your-compute-appserver}/solve'
+
+  //if this code is running as a front end to your appserver, you only need to call /solve
 
   let response = await fetch(url, request)
 

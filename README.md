@@ -21,12 +21,10 @@ This app is intended to host one or more custom grasshopper definitions and serv
 - A workshop on using the appserver can be found at https://vimeo.com/442079095 - also [slides](https://docs.google.com/presentation/d/1nCbd87iA_D2ZCwoSirOYK3har6XUJHDUEIkt635btUU)
 - AECTECH 2020 workshop: https://youtu.be/At4BaIuEE3c - [slides](https://docs.google.com/presentation/d/1uY6DcYpBNrgxk8sbHHv1gy3IZWRmO7QF1rUT1XOl3s0/edit?usp=drivesdk)
 
-## Example
-When we have our testing server up and running, you can visit
+## Examples
+When we have our testing server up and running, you can visit to see various samples:
 
 https://compute-rhino3d-appserver.herokuapp.com/examples/
-
-To see a sample web application that passes three numbers based on slider positions to the AppServer for solving a grasshopper definition. Results are returned to the web page and new mesh visualizations are created.
 
 ----
 ## Other Information

@@ -22,7 +22,11 @@ router.get('/', async(req, res, next) => {
     //console.log(definition)
     let data
     try {
-      data = await getParams(definition.path)
+
+      let fullUrl = req.protocol + '://' + req.get('host')
+      let definitionPath = `${fullUrl}/definition/${definition.id}`
+
+      data = await getParams(definitionPath)
     } catch (err) {
       console.log(err)
       next(err)

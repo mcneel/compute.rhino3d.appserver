@@ -25,6 +25,7 @@ function registerDefinitions() {
     if(file.includes('.gh') || file.includes('.ghx')) {
       const fullPath = path.join(__dirname, 'files/' + file)
       const hash = md5File.sync(fullPath)
+      
       definitions.push({
         name: file,
         id:hash,
@@ -41,7 +42,6 @@ async function getParams(definitionUrl) {
   compute.apiKey = process.env.RHINO_COMPUTE_KEY
 
   const response = await compute.computeFetch('io', { 'pointer': definitionUrl }, false)
-  console.log(definitionUrl)
   
   // throw error if response not ok
   if(!response.ok) {
@@ -49,7 +49,6 @@ async function getParams(definitionUrl) {
   }
 
   let result = await response.json()
-  console.log(result)
 
   // json returned by /io is PascalCase and looks weird in javascript
   result = camelcaseKeys(result, {deep: true})

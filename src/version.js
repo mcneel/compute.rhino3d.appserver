@@ -1,12 +1,14 @@
-const compute = require('compute-rhino3d')
+
 const appserverVersion = require('../package.json').version
 
 async function getVersion() {
 
-  compute.url = process.env.RHINO_COMPUTE_URL
-  compute.apiKey = process.env.RHINO_COMPUTE_KEY
+  let request = {
+    'method':'GET',
+    'headers': {'RhinoComputeKey': process.env.RHINO_COMPUTE_KEY }
+  }
 
-  const response = await fetch(compute.url + 'version')
+  const response = await fetch( process.env.RHINO_COMPUTE_URL + 'version', request )
   console.log(response)
   const result = await response.json()
 

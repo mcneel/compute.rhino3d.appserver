@@ -7,7 +7,7 @@ async function getVersion() {
   compute.apiKey = process.env.RHINO_COMPUTE_KEY
 
   const response = await fetch(compute.url + 'version')
-  //console.log(response)
+  console.log(response)
   const result = await response.json()
 
   result.appserver = appserverVersion

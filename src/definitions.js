@@ -63,7 +63,7 @@ async function getParams(definitionUrl) {
 
   inputs.forEach( i => {
     if (  i.paramType === 'Geometry' ||
-          i.paramType === 'Point' ||
+         // i.paramType === 'Point' ||
           i.paramType === 'Curve' ) {
             view = false
           }

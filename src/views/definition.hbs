@@ -83,18 +83,22 @@ const loader = new Rhino3dmLoader()
 loader.setLibraryPath( 'https://unpkg.com/rhino3dm@8.0.0-beta3/' )
 
 // initialise 'data' object that will be used by compute()
-const data = {
-  definition: '{{name}}',
-  inputs: getInputs()
-}
+
 
 // globals
 let doc, scene, camera, renderer, controls
+const mouse = new THREE.Vector3() // to handle mouse clicks
 
 const rhino = await rhino3dm()
 console.log('Loaded rhino3dm.')
 
 init()
+//need to init so we have a canvas to add a listener to
+const data = {
+  definition: '{{name}}',
+  inputs: getInputs()
+}
+
 compute()
 
 const downloadButton = document.getElementById("downloadButton")
@@ -129,6 +133,14 @@ function getInputs() {
         break
     }
   }
+  const a = {{{inputs}}}
+  console.log(a)
+  if('points' in a) {
+    console.log('yes we have points')
+    inputs[a.id] = []
+    window.addEventListener('click', onClick, false);
+  }
+
   return inputs
 }
 
@@ -178,7 +190,15 @@ function init() {
 async function compute() {
   // construct url for GET /solve/definition.gh?name=value(&...)
   const url = new URL('/solve/' + data.definition, window.location.origin)
-  Object.keys(data.inputs).forEach(key => url.searchParams.append(key, data.inputs[key]))
+  console.log(data.inputs)
+  Object.keys(data.inputs).forEach(key => {
+    if( typeof data.inputs[key] === 'object' && data.inputs[key] !== null) {
+      console.log(JSON.stringify(data.inputs[key]))
+      url.searchParams.append(key, btoa(JSON.stringify(data.inputs[key])))
+    }
+    else
+      url.searchParams.append(key, data.inputs[key])
+    })
   console.log(url.toString())
   
   try {
@@ -315,7 +335,9 @@ function decodeItem(item) {
 
         }
         
-    } catch {} // ignore errors (maybe the string was just a string...)
+    } catch {
+      console.log(data)
+    } // ignore errors (maybe the string was just a string...)
   } else if (typeof data === 'object') {
     //console.log(data)
     return rhino.CommonObject.decode(data)
@@ -348,6 +370,43 @@ function onSliderChange () {
   data.inputs = inputs
 
   compute()
+}
+
+/**
+  *
+  * Handle mouse clicks
+  *
+**/
+
+function onClick (event) {
+
+  console.log('I clicked!!!')
+
+  // calculate mouse position in normalized device coordinates
+      // (-1 to +1) for both components
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1
+      mouse.y = - (event.clientY / window.innerHeight) * 2 + 1
+      mouse.z = 0
+      mouse.unproject(camera)
+
+      console.log(`${mouse.x},${mouse.y},${mouse.z}`)
+
+      // add json-encoded Point3d to list
+      // e.g. '{ "X": 1.0, "Y": 2.0, "Z": 0.0 }'
+      const pt = "{\"X\":" + mouse.x + ",\"Y\":" + mouse.y + ",\"Z\":" + mouse.z + "}"
+      // in delaunay.gh the input is "points"
+      // TODO FIX THIS!!!!!!!!
+      data.inputs['points'].push(pt)
+
+      // don't bother solving until we have three points
+      if (data.inputs['points'].length < 3) {
+        console.log("Need at least three points!")
+        return
+      }
+
+      // solve and update the geometry!
+      compute()
+
 }
 
 /**

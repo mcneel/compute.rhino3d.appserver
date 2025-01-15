@@ -127,6 +127,19 @@ router.get('/:name', async (req, res, next) => {
           }
         })
         break
+      case 'Point':
+        const points = {
+          name: name,
+          id: id,
+          points: {
+            value: input.default
+          }
+        }
+        view.inputs.push(JSON.stringify(points))
+        break
+      default:
+        console.log(input.paramType)
+        break
     }
   }
 

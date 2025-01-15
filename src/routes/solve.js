@@ -126,6 +126,17 @@ function commonSolve (req, res, next){
     let trees = []
     if(res.locals.params.inputs !== undefined) { //TODO: handle no inputs
       for (let [key, value] of Object.entries(res.locals.params.inputs)) {
+        try{
+
+          console.log(value)
+          const b64 = Buffer.from(value, 'base64')
+          console.log(b64)
+          console.log(JSON.parse(b64))
+          value = JSON.parse(b64)
+
+        }catch{
+
+        }
         let param = new compute.Grasshopper.DataTree(key)
         param.append([0], Array.isArray(value) ? value : [value])
         trees.push(param)

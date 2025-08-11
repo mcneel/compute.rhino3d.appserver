@@ -4,8 +4,8 @@ You are going to want to be able to have this application run in two different l
 - Run locally for testing and debugging
 - Run on a production web server
 
-## Step 1 - Install Rhino 7 and Rhino.Compute
-AppServer requires Rhino 7 and Rhino.Compute. Please see the ["Developing with Rhino Compute"](https://developer.rhino3d.com/guides/compute/development/) guide for instructions. Ensure Rhino.Compute has started and is listening on http://localhost:6500
+## Step 1 - Install Rhino 7 (or higher) and Rhino.Compute
+AppServer requires Rhino 7 (or higher) and Rhino.Compute. Please see the ["Developing with Rhino Compute"](https://developer.rhino3d.com/guides/compute/development/) guide for instructions. Ensure Rhino.Compute has started and is listening on http://localhost:6500
 
 ## Step 2 - Git this repository and install dependencies
 Clone this repository and install dependencies
